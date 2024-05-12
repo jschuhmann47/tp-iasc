@@ -13,8 +13,8 @@ defmodule TpIasc do
 
   """
   def hello do
-    :world
     IO.puts("hello")
     IO.puts("world")
+    :world
   end
 end
