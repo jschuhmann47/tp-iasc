@@ -1,16 +1,14 @@
 defmodule Bloque.NodoDatosSupervisor do
-  alias Bloque.NodoDatos
-  alias Bloque.NodoDatosServer
   use Supervisor
 
   def start_link(init_arg) do
     Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
-  @impl true
   def init(_init_arg) do
     children = [
-      {NodoDatosServer, NodoDatos}
+      %{id: Bloque.NodoDatosServer, start: {Bloque.NodoDatosServer, :start_link, [Bloque.NodoDatosServer]}, restart: :transient},
+      %{id: Bloque.NodoDatos, start: {Bloque.NodoDatos, :start_link, [Bloque.NodoDatos]}, restart: :transient},
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

@@ -14,7 +14,8 @@ defmodule TpIasc.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :wx, :runtime_tools, :observer]
+      extra_applications: [:logger, :wx, :runtime_tools, :observer],
+      mod: {Bloque, []}
     ]
   end
 
