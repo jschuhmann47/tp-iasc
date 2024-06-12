@@ -10,7 +10,8 @@ defmodule Orquestadores.Orquestador do
   end
 
   def handle_call({:get, key}, _from, state) do
-    {_res, value, _state} = GenServer.call(Bloque.NodoDatosServer, {:get, key})
+    # TODO: handle errors
+    value = GenServer.call(Bloque.NodoDatosServer, {:get, key})
     {:reply, value, state}
   end
 
