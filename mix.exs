@@ -15,7 +15,7 @@ defmodule TpIasc.MixProject do
   def application do
     [
       extra_applications: [:logger, :wx, :runtime_tools, :observer],
-      mod: {Bloque, []}
+      mod: {TpIasc, []}
     ]
   end
 

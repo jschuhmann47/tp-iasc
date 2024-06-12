@@ -2,7 +2,7 @@ defmodule Bloque do
   use Application
 
   def start(_type, _args) do
-    name_application()
+    # name_application() // TODO
     Bloque.NodoDatosSupervisor.start_link(:ok)
   end
 
