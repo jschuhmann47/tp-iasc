@@ -6,8 +6,7 @@ defmodule TpIasc do
 
   def start(_type, _args) do
     name_application()
-    SupervisorBloques.start_link(:ok)
-    Bloque.start(:ok, :ok)
+    MainSupervisor.start_link(:ok)
   end
 
   def name_application() do

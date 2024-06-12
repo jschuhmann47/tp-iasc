@@ -7,7 +7,7 @@ defmodule Bloque.NodoDatosServer do
   end
 
   def start_link(name) do
-    GenServer.start_link(name, %{})
+    GenServer.start_link(__MODULE__, :ok, name: name)
   end
 
   def handle_call({:get, key}, _from, state) do
