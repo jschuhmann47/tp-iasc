@@ -7,7 +7,11 @@ defmodule SupervisorOrquestadores do
 
   def init(_init_arg) do
     children = [
-      %{id: Orquestadores.Orquestador, start: {Orquestadores.Orquestador, :start_link, [Orquestadores.Orquestador]}, restart: :transient},
+      %{
+        id: Orquestadores.Orquestador,
+        start: {Orquestadores.Orquestador, :start_link, [Orquestadores.Orquestador]},
+        restart: :transient
+      }
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

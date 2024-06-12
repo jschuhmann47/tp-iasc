@@ -4,5 +4,4 @@ defmodule Clientes.Cliente do
   def init(state) do
     {:ok, state}
   end
-  
 end

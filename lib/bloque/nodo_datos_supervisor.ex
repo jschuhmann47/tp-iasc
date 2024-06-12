@@ -7,8 +7,16 @@ defmodule Bloque.NodoDatosSupervisor do
 
   def init(_init_arg) do
     children = [
-      %{id: Bloque.NodoDatos, start: {Bloque.NodoDatos, :start_link, [Bloque.NodoDatos]}, restart: :transient},
-      %{id: Bloque.NodoDatos2, start: {Bloque.NodoDatos, :start_link, [Bloque.NodoDatos2]}, restart: :transient},
+      %{
+        id: Bloque.NodoDatos,
+        start: {Bloque.NodoDatos, :start_link, [Bloque.NodoDatos]},
+        restart: :transient
+      },
+      %{
+        id: Bloque.NodoDatos2,
+        start: {Bloque.NodoDatos, :start_link, [Bloque.NodoDatos2]},
+        restart: :transient
+      }
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

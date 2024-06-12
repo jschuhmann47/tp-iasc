@@ -12,5 +12,4 @@ defmodule Bloque.NodoDatos do
   def update(name, key, value) do
     Agent.update(name, &Map.put(&1, key, value))
   end
-
 end
