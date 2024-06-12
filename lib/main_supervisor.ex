@@ -8,6 +8,7 @@ defmodule MainSupervisor do
   def init(_init_arg) do
     children = [
       %{id: SupervisorBloques, start: {SupervisorBloques, :start_link, [SupervisorBloques]}, restart: :transient},
+      %{id: SupervisorOrquestadores, start: {SupervisorOrquestadores, :start_link, [SupervisorOrquestadores]}, restart: :transient},
       %{id: Bloque.NodoDatosSupervisor, start: {Bloque.NodoDatosSupervisor, :start_link, [Bloque.NodoDatosSupervisor]}, restart: :transient},
     ]
 
