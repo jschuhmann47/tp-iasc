@@ -1,23 +1,21 @@
 defmodule Bloque.NodoDatosSupervisor do
   use Supervisor
 
+  @nodo_datos_cantidad 10 # Cantidad de nodos de datos, por ahora igual a la cantidad de servidores
+
   def start_link(init_arg) do
     Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
   def init(_init_arg) do
-    children = [
-      %{
-        id: Bloque.NodoDatos,
-        start: {Bloque.NodoDatos, :start_link, [Bloque.NodoDatos]},
-        restart: :transient
-      },
-      # %{
-      #   id: Bloque.NodoDatos2,
-      #   start: {Bloque.NodoDatos, :start_link, [Bloque.NodoDatos2]},
-      #   restart: :transient
-      # }
-    ]
+    children =
+      for i <- 1..@nodo_datos_cantidad do
+        %{
+          id: {:bloque_nodo_datos_agent, i},
+          start: {Bloque.NodoDatos, :start_link, [{:global, {:nodo_datos, i}}]},
+          restart: :transient
+        }
+      end
 
     Supervisor.init(children, strategy: :one_for_one)
   end

@@ -5,11 +5,11 @@ defmodule Bloque.NodoDatos do
     Agent.start_link(fn -> %{} end, name: name)
   end
 
-  def value(key) do
-    Agent.get(__MODULE__, &Map.get(&1, key))
+  def value(agent, key) do
+    Agent.get(agent, &Map.get(&1, key))
   end
 
-  def update(key, value) do
-    Agent.update(__MODULE__, &Map.put(&1, key, value))
+  def update(agent, key, value) do
+    Agent.update(agent, &Map.put(&1, key, value))
   end
 end
