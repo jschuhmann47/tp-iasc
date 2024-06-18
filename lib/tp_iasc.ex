@@ -3,7 +3,7 @@ defmodule TpIasc do
 
   def start(_type, _args) do
     name_application()
-    init_cowboy()
+    # init_cowboy()
     MainSupervisor.start_link(:ok)
   end
 

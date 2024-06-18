@@ -1,14 +1,17 @@
 defmodule Cliente.ClienteHandler do
-  def init(req, state) do
-    handle(req, state)
+  def init([]) do
+    {:ok, []}
   end
 
-  # def start_link() do
-
+  # def handle(req, state) do
+  #   {:ok, req2} = :cowboy_req.reply(200, ["content-type": "text/plain"], "Hello world!", req)
+  #   {:ok, req2, state}
   # end
 
-  def handle(req, state) do
-    {:ok, req2} = :cowboy_req.reply(200, ["content-type": "text/plain"], "Hello world!", req)
+  def call(req, state) do
+    # req{"req_headers"} = req{"req_headers"}[0]
+    # el tema que falla porque req_headers es un array con el map, y quiero solo el map
+    req2 = :cowboy_req.reply(200, %{"content-type" => "text/plain"}, "Hello world!", req)
     {:ok, req2, state}
   end
 

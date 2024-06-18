@@ -7,12 +7,10 @@ defmodule Cliente.ClienteSupervisor do
 
   def init(_arg) do
     children = [
-      # %{
-      #   id: Cliente.ClienteHandler,
-      #   start: {Cliente.ClienteHandler, :start_link, [Cliente.ClienteHandler]},
-      #   restart: :transient
-      # },
+      {Plug.Cowboy, scheme: :http, plug: Cliente.ClienteHandler, port: 8080}
     ]
-    Supervisor.init(children, strategy: :one_for_one)
+
+    opts = [strategy: :one_for_one, name: Cliente.ClienteSupervisor]
+    Supervisor.init(children, opts)
   end
 end
