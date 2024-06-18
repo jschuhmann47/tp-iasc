@@ -7,17 +7,11 @@ defmodule MainSupervisor do
   end
 
   def init(_init_arg) do
-    dispatch = :cowboy_router.compile([
-      {:_, [{"/", Cliente.ClienteHandler, []}]}
-    ])
-    {:ok, _} = :cowboy.start_clear(:http,
-                          [port: 8080],
-                          %{env: [dispatch: dispatch]})
+
     children = [
       %{
         id: SupervisorBloques,
         start: {SupervisorBloques, :start_link, [SupervisorBloques]},
-        restart: :transient
       },
       %{
         id: SupervisorOrquestadores,
