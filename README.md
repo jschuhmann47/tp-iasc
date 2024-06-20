@@ -12,4 +12,7 @@ GenServer.call(Orquestador1, {:get, "a"})
 
 
 GenServer.cast(Orquestador1, {:put, "a", "b"})
+GenServer.cast(Orquestador1, {:put, "j", "f"})
+GenServer.cast(Orquestador1, {:put, "adsa", 158})
+
 GenServer.call(Orquestador1, :keys_distribution)
