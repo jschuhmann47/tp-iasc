@@ -1,4 +1,6 @@
 defmodule Cliente.ClienteHandler do
+  import Plug.Conn
+
   def init([]) do
     {:ok, []}
   end
@@ -9,10 +11,12 @@ defmodule Cliente.ClienteHandler do
   # end
 
   def call(req, state) do
-    # req{"req_headers"} = req{"req_headers"}[0]
+    req
+    |> put_resp_content_type("text/plain")
+    |> send_resp(200, "Hello World!\n")
+    # Map.put(req, "resp_headers", Enum.at(headers, 0))
     # el tema que falla porque req_headers es un array con el map, y quiero solo el map
-    req2 = :cowboy_req.reply(200, %{"content-type" => "text/plain"}, "Hello world!", req)
-    {:ok, req2, state}
+    {:ok, req, state}
   end
 
   def terminate(_reason, _req, _state), do: :ok
