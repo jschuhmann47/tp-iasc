@@ -1,9 +1,7 @@
 defmodule Cliente.ClienteHandler do
   import Plug.Conn
 
-  def init([]) do
-    {:ok, []}
-  end
+  def init(options), do: options
 
   def call(req, state) do
     req
