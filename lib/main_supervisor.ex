@@ -27,8 +27,8 @@ defmodule MainSupervisor do
         restart: :transient
       },
       %{
-        id: Cliente.ClienteSupervisor,
-        start: {Cliente.ClienteSupervisor, :start_link, [Cliente.ClienteSupervisor]},
+        id: Clientes.ClienteSupervisor,
+        start: {Clientes.ClienteSupervisor, :start_link, [Clientes.ClienteSupervisor]},
         restart: :transient
       }
     ]

@@ -1,4 +1,4 @@
-defmodule Cliente.ClienteHandler do
+defmodule Clientes.ClienteHandler do
   use Plug.Router
 
   plug(:match)
@@ -9,7 +9,7 @@ defmodule Cliente.ClienteHandler do
   end
 
   put "/" do
-    send_resp(conn, 200, "Updated key")
+    send_resp(conn, 201, "Updated key")
   end
 
   match _ do
