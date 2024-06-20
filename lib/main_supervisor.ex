@@ -9,12 +9,12 @@ defmodule MainSupervisor do
   end
 
   def init(_init_arg) do
+
     children = [
       {Registry, [keys: :unique, name: @nodo_datos_registry_name]},
       %{
         id: SupervisorBloques,
         start: {SupervisorBloques, :start_link, [SupervisorBloques]},
-        restart: :transient
       },
       %{
         id: SupervisorOrquestadores,
@@ -26,6 +26,11 @@ defmodule MainSupervisor do
         start: {Bloque.NodoDatosSupervisor, :start_link, [Bloque.NodoDatosSupervisor]},
         restart: :transient
       },
+      %{
+        id: Cliente.ClienteSupervisor,
+        start: {Cliente.ClienteSupervisor, :start_link, [Cliente.ClienteSupervisor]},
+        restart: :transient
+      }
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
