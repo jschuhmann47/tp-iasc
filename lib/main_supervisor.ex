@@ -2,6 +2,8 @@
 defmodule MainSupervisor do
   use Supervisor
 
+  @nodo_datos_registry_name :nodo_datos_registry
+
   def start_link(init_arg) do
     Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
@@ -9,6 +11,7 @@ defmodule MainSupervisor do
   def init(_init_arg) do
 
     children = [
+      {Registry, [keys: :unique, name: @nodo_datos_registry_name]},
       %{
         id: SupervisorBloques,
         start: {SupervisorBloques, :start_link, [SupervisorBloques]},
