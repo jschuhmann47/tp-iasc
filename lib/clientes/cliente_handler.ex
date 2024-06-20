@@ -7,6 +7,7 @@ defmodule Cliente.ClienteHandler do
     req
     |> put_resp_content_type("text/plain")
     |> send_resp(200, "Hello World!\n")
+
     {:ok, req, state}
   end
 
