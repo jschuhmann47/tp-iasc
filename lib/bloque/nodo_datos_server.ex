@@ -1,9 +1,11 @@
 defmodule Bloque.NodoDatosServer do
   use GenServer
+  require Logger
 
   @nodo_datos_registry_name :nodo_datos_registry
 
   def init(node_id) do
+    Logger.info("NodoDatosServer started with id: #{inspect(node_id)}")
     {:ok, node_id}
   end
 
@@ -26,6 +28,10 @@ defmodule Bloque.NodoDatosServer do
     GenServer.call(via_tuple(node_id), {:get, key})
   end
 
+  def keys(node_id) do
+    GenServer.call(via_tuple(node_id), :keys)
+  end
+
   def update(node_id, key, value) do
     GenServer.cast(via_tuple(node_id), {:put, key, value})
   end
@@ -35,12 +41,16 @@ defmodule Bloque.NodoDatosServer do
     {:reply, value, node_id}
   end
 
+  def handle_call(:keys, _from, node_id) do
+    keys = Bloque.NodoDatos.keys({:global, {:nodo_datos, node_id}})
+    {:reply, keys, node_id}
+  end
+
   def handle_cast({:put, key, value}, node_id) do
     Bloque.NodoDatos.update({:global, {:nodo_datos, node_id}}, key, value)
     {:noreply, node_id}
   end
 end
-
 
 # GenServer.cast(Orquestador1, {:put, "a", "b"})
 # GenServer.call(Orquestador1, {:get, "a"})

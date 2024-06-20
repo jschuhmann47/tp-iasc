@@ -9,7 +9,7 @@ defmodule Bloque.NodoDatosSupervisor do
 
   def init(_init_arg) do
     children =
-      for i <- 1..@nodo_datos_cantidad do
+      for i <- 0..@nodo_datos_cantidad do
         %{
           id: {:bloque_nodo_datos_agent, i},
           start: {Bloque.NodoDatos, :start_link, [{:global, {:nodo_datos, i}}]},

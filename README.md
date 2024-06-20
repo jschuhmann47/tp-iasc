@@ -5,9 +5,11 @@
 
 ## Ejemplo put y get
 
-iex(1)> GenServer.cast(Orquestador1, {:put, "a", "b"})
-:ok
-iex(2)> GenServer.call(Orquestador1, {:get, "a"})
-"b"
-iex(3)> GenServer.call(Orquestador2, {:get, "a"})
-"b"
+GenServer.cast(Orquestador1, {:put, "a", "b"})
+GenServer.call(Orquestador1, {:put, "c", 15})
+GenServer.call(Orquestador1, {:get, "a"})
+GenServer.call(Orquestador1, {:get, "a"})
+
+
+GenServer.cast(Orquestador1, {:put, "a", "b"})
+GenServer.call(Orquestador1, :keys_distribution)

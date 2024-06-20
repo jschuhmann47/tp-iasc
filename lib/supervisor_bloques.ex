@@ -9,7 +9,7 @@ defmodule SupervisorBloques do
 
   def init(_init_arg) do
     children =
-      for i <- 1..@nodo_datos_cantidad do
+      for i <- 0..@nodo_datos_cantidad do
         Supervisor.child_spec(
           %{
             id: {:bloque_nodo_datos_server, i},
