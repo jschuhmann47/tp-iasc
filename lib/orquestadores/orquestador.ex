@@ -5,9 +5,10 @@ defmodule Orquestadores.Orquestador do
     {:ok, state}
   end
 
-  def start_link(name) do
-    GenServer.start_link(__MODULE__, :ok, name: name)
+  def start_link(intial_state, name) do
+    GenServer.start_link(__MODULE__, intial_state, name: name)
   end
+
 
   def handle_call({:get, key}, _from, state) do
     # TODO: handle errors and etc

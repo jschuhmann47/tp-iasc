@@ -41,6 +41,6 @@ defmodule Bloque.NodoDatosServer do
   end
 end
 
-# GenServer.call(Orquestadores.Orquestador, {:get, NodoDatos, "a"})
-# GenServer.cast(Orquestadores.Orquestador, {:put, "a", "b"})
-# GenServer.call(Orquestadores.Orquestador, {:get, "a"})
+
+# GenServer.cast(Orquestador1, {:put, "a", "b"})
+# GenServer.call(Orquestador1, {:get, "a"})
