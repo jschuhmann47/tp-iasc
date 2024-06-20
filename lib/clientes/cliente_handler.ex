@@ -1,15 +1,18 @@
 defmodule Cliente.ClienteHandler do
-  import Plug.Conn
+  use Plug.Router
 
-  def init(options), do: options
+  plug(:match)
+  plug(:dispatch)
 
-  def call(req, state) do
-    req
-    |> put_resp_content_type("text/plain")
-    |> send_resp(200, "Hello World!\n")
-
-    {:ok, req, state}
+  get "/" do
+    send_resp(conn, 200, "Welcome")
   end
 
-  def terminate(_reason, _req, _state), do: :ok
+  put "/" do
+    send_resp(conn, 200, "Updated key")
+  end
+
+  match _ do
+    send_resp(conn, 404, "Oops!")
+  end
 end
