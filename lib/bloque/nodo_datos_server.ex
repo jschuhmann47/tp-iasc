@@ -8,7 +8,7 @@ defmodule Bloque.NodoDatosServer do
   end
 
   def start_link(node_id) do
-    GenServer.start_link(__MODULE__, node_id, name: {:via, Registry, {@nodo_datos_registry_name, node_id}})
+    GenServer.start_link(__MODULE__, node_id, name: via_tuple(node_id))
   end
 
   def child_spec({node_id}) do
