@@ -18,10 +18,27 @@ Para iniciar la aplicación y ejecutar los tests:
 iex.bat -S mix test
 ```
 
-Finished in 0.2 seconds (0.2s async, 0.00s sync)
-7 tests, 0 failures
-
 **Warning**: Luego de ejecutar los tests, el entorno puede tener procesos con el estado sucio. No ejecutar los tests en producción.
+
+## Ejecutar en Linux
+
+Descargar dependencias:
+
+```bash
+mix deps.get
+```
+
+Ejecutar:
+
+```bash
+iex -S mix
+```
+
+Correr tests:
+
+```bash
+mix test
+```
 
 ## Ejemplo `put` y `get`
 
