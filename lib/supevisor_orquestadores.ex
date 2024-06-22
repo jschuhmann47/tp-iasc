@@ -6,7 +6,7 @@ defmodule SupervisorOrquestadores do
   end
 
   def init(_init_arg) do
-    nodo_datos_cantidad = 10  # TODO: obtener de la configuración?
+    nodo_datos_cantidad = Application.get_env(:tp_iasc, :nodo_datos_cantidad)
 
     children = [
       %{id: Orquestador1, start: {Orquestadores.Orquestador, :start_link, [[], nodo_datos_cantidad, Orquestador1]}, restart: :transient},
