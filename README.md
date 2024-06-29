@@ -37,7 +37,7 @@ iex -S mix
 Correr tests:
 
 ```bash
-mix test
+iex -S mix test
 ```
 
 ## Ejemplo `put` y `get`
