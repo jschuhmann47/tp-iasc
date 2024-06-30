@@ -23,7 +23,8 @@ defmodule TpIasc.MixProject do
   defp deps do
     [
       {:libcluster, "~> 3.3"},
-      {:horde, "~> 0.8.3"}
+      {:horde, "~> 0.8.3"},
+      {:plug_cowboy, "~> 2.0"}
     ]
   end
 end

@@ -41,5 +41,7 @@ defmodule MainSupervisor do
       restart: :transient
     })
 
+    start_child({Plug.Cowboy, scheme: :http, plug: Clientes.ClienteHandler, options: [port: 8080]})
+
   end
 end
