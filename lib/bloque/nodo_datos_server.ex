@@ -2,7 +2,7 @@ defmodule Bloque.NodoDatosServer do
   use GenServer
   require Logger
 
-  @nodo_datos_registry_name :nodo_datos_registry
+  @nodo_datos_registry_name TpIasc.Registry
 
   def init(node_id) do
     Logger.info("NodoDatosServer started with id: #{inspect(node_id)}")
@@ -22,7 +22,7 @@ defmodule Bloque.NodoDatosServer do
     }
   end
 
-  defp via_tuple(node_id), do: {:via, Registry, {@nodo_datos_registry_name, node_id}}
+  defp via_tuple(node_id), do: {:via, Horde.Registry, {@nodo_datos_registry_name, node_id}}
 
   def value(node_id, key) do
     GenServer.call(via_tuple(node_id), {:get, key})
@@ -51,6 +51,3 @@ defmodule Bloque.NodoDatosServer do
     {:noreply, node_id}
   end
 end
-
-# GenServer.cast(Orquestador1, {:put, "a", "b"})
-# GenServer.call(Orquestador1, {:get, "a"})

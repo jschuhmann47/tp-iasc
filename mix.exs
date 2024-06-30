@@ -22,8 +22,6 @@ defmodule TpIasc.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:cowboy, "~> 2.12"},
-      {:plug_cowboy, "~> 2.0"},
       {:libcluster, "~> 3.3"},
       {:horde, "~> 0.8.3"}
     ]

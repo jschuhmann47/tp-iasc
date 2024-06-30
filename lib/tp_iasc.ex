@@ -5,7 +5,28 @@ defmodule TpIasc do
   def start(_type, _args) do
     configure_logging()
     name_application()
-    MainSupervisor.start_link(:ok)
+
+    topologies = Application.get_env(:libcluster, :topologies) || []
+
+    children = [
+      {Cluster.Supervisor, [topologies, [name: TpIasc.ClusterSupervisor]]},
+      {Horde.Registry, [keys: :unique, name: TpIasc.Registry]},
+      {TpIasc.DistributedSupervisor, [strategy: :one_for_one, distribution_strategy: Horde.UniformQuorumDistribution, process_redistribution: :active]}
+    ]
+
+    opts = [strategy: :one_for_one, name: TpIasc.Supervisor]
+    Supervisor.start_link(children, opts)
+
+    start_supervised_processes()
+  end
+
+  defp start_supervised_processes do
+    # Esperar un momento para asegurarse de que todos los nodos se hayan unido al clúster
+    :timer.sleep(2000)
+
+    # Iniciar MainSupervisor y sus procesos hijos
+    MainSupervisor.start_link([])
+    MainSupervisor.init_child_processes()
   end
 
   def name_application() do
