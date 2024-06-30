@@ -23,8 +23,7 @@ defmodule TpIasc.MixProject do
   defp deps do
     [
       {:cowboy, "~> 2.12"},
-      {:plug_cowboy, "~> 2.0"},
-      {:horde, "~> 0.9.0"}
+      {:plug_cowboy, "~> 2.0"}
     ]
   end
 end

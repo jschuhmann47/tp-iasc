@@ -26,7 +26,11 @@ defmodule MainSupervisor do
         start: {Bloque.NodoDatosSupervisor, :start_link, [Bloque.NodoDatosSupervisor]},
         restart: :transient
       },
-      {Plug.Cowboy, scheme: :http, plug: Clientes.ClienteHandler, options: [port: 8080]}
+      %{
+        id: Clientes.ClienteSupervisor,
+        start: {Clientes.ClienteSupervisor, :start_link, [Clientes.ClienteSupervisor]},
+        restart: :transient
+      }
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
