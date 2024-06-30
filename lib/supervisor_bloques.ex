@@ -6,7 +6,6 @@ defmodule SupervisorBloques do
   end
 
   def init(_init_arg) do
-
     nodo_datos_cantidad = Application.get_env(:tp_iasc, :nodo_datos_cantidad)
 
     children =

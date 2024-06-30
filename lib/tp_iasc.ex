@@ -11,7 +11,12 @@ defmodule TpIasc do
     children = [
       {Cluster.Supervisor, [topologies, [name: TpIasc.ClusterSupervisor]]},
       {Horde.Registry, [keys: :unique, name: TpIasc.Registry]},
-      {TpIasc.DistributedSupervisor, [strategy: :one_for_one, distribution_strategy: Horde.UniformQuorumDistribution, process_redistribution: :active]}
+      {TpIasc.DistributedSupervisor,
+       [
+         strategy: :one_for_one,
+         distribution_strategy: Horde.UniformQuorumDistribution,
+         process_redistribution: :active
+       ]}
     ]
 
     opts = [strategy: :one_for_one, name: TpIasc.Supervisor]
