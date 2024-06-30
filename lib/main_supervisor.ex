@@ -1,4 +1,5 @@
 defmodule MainSupervisor do
+  require Logger
   use Horde.DynamicSupervisor
 
   @nodo_datos_registry_name TpIasc.Registry
@@ -40,9 +41,10 @@ defmodule MainSupervisor do
       start: {Bloque.NodoDatosSupervisor, :start_link, [[]]},
       restart: :transient
     })
-
+    port = 8080 + Enum.random(1..100)
+    Logger.info("Port: #{port}")
     start_child(
-      {Plug.Cowboy, scheme: :http, plug: Clientes.ClienteHandler, options: [port: 8080]}
+      {Plug.Cowboy, scheme: :http, plug: Clientes.ClienteHandler, options: [port: port]}
     )
   end
 end
