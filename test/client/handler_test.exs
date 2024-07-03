@@ -2,15 +2,15 @@ defmodule TpIascRouterTest do
   use ExUnit.Case, async: true
   use Plug.Test
 
-  alias Clientes.ClienteHandler
+  alias Clients.ClientHandler
 
-  @opts ClienteHandler.init([])
+  @opts ClientHandler.init([])
 
   test "returns welcome" do
     conn =
       :get
       |> conn("/", "")
-      |> ClienteHandler.call(@opts)
+      |> ClientHandler.call(@opts)
 
     assert conn.state == :sent
     assert conn.status == 200
@@ -21,7 +21,7 @@ defmodule TpIascRouterTest do
     conn =
       :put
       |> conn("/")
-      |> ClienteHandler.call(@opts)
+      |> ClientHandler.call(@opts)
 
     assert conn.state == :sent
     assert conn.status == 201
@@ -31,7 +31,7 @@ defmodule TpIascRouterTest do
     conn =
       :get
       |> conn("/missing", "")
-      |> ClienteHandler.call(@opts)
+      |> ClientHandler.call(@opts)
 
     assert conn.state == :sent
     assert conn.status == 404

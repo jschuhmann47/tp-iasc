@@ -1,11 +1,11 @@
-defmodule Bloque.NodoDatosServer do
+defmodule Block.Listener do
   use GenServer
   require Logger
 
-  @nodo_datos_registry_name TpIasc.Registry
+  @block_listener_registry TpIasc.Registry
 
   def init(node_id) do
-    Logger.info("NodoDatosServer started with id: #{inspect(node_id)}")
+    Logger.info("Block listener started with id: #{inspect(node_id)}")
     {:ok, node_id}
   end
 
@@ -15,14 +15,14 @@ defmodule Bloque.NodoDatosServer do
 
   def child_spec({node_id}) do
     %{
-      id: {:bloque_nodo_datos_server, node_id},
+      id: {:block_listener, node_id},
       start: {__MODULE__, :start_link, [node_id]},
       type: :worker,
       restart: :transient
     }
   end
 
-  defp via_tuple(node_id), do: {:via, Horde.Registry, {@nodo_datos_registry_name, node_id}}
+  defp via_tuple(node_id), do: {:via, Horde.Registry, {@block_listener_registry, node_id}}
 
   def value(node_id, key) do
     GenServer.call(via_tuple(node_id), {:get, key})
@@ -37,17 +37,17 @@ defmodule Bloque.NodoDatosServer do
   end
 
   def handle_call({:get, key}, _from, node_id) do
-    value = Bloque.NodoDatos.value({:global, {:nodo_datos, node_id}}, key)
+    value = Block.Listener.value({:global, {:block_dictionary, node_id}}, key)
     {:reply, value, node_id}
   end
 
   def handle_call(:keys, _from, node_id) do
-    keys = Bloque.NodoDatos.keys({:global, {:nodo_datos, node_id}})
+    keys = Block.Listener.keys({:global, {:block_dictionary, node_id}})
     {:reply, keys, node_id}
   end
 
   def handle_cast({:put, key, value}, node_id) do
-    Bloque.NodoDatos.update({:global, {:nodo_datos, node_id}}, key, value)
+    Block.Listener.update({:global, {:block_dictionary, node_id}}, key, value)
     {:noreply, node_id}
   end
 end

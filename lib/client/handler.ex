@@ -1,4 +1,4 @@
-defmodule Clientes.ClienteHandler do
+defmodule Clients.ClientHandler do
   use Plug.Router
 
   plug(:match)

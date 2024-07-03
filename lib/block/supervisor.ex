@@ -1,4 +1,4 @@
-defmodule Bloque.NodoDatosSupervisor do
+defmodule Block.BSupervisor do
   use Supervisor
 
   def start_link(init_arg) do
@@ -6,14 +6,14 @@ defmodule Bloque.NodoDatosSupervisor do
   end
 
   def init(_init_arg) do
-    nodo_datos_cantidad = Application.get_env(:tp_iasc, :nodo_datos_cantidad)
+    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count)
     # TODO: Aqui se deberia definir el tema de la replicacion de los nodos de datos?
 
     children =
-      for i <- 0..nodo_datos_cantidad do
+      for i <- 0..dictionary_count do
         %{
-          id: {:bloque_nodo_datos_agent, i},
-          start: {Bloque.NodoDatos, :start_link, [{:global, {:nodo_datos, i}}]},
+          id: {:dictionary, i},
+          start: {Block.Dictionary, :start_link, [{:global, {:block_dictionary, i}}]},
           restart: :transient
         }
       end

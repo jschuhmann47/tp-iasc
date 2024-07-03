@@ -2,7 +2,7 @@ defmodule MainSupervisor do
   require Logger
   use Horde.DynamicSupervisor
 
-  @nodo_datos_registry_name TpIasc.Registry
+  @dictionary_registry TpIasc.Registry
 
   def start_link(init_arg) do
     Horde.DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
@@ -19,32 +19,32 @@ defmodule MainSupervisor do
 
   def init_child_processes do
     start_child(%{
-      id: @nodo_datos_registry_name,
-      start: {Horde.Registry, :start_link, [keys: :unique, name: @nodo_datos_registry_name]},
+      id: @dictionary_registry,
+      start: {Horde.Registry, :start_link, [keys: :unique, name: @dictionary_registry]},
       restart: :permanent
     })
 
     start_child(%{
-      id: SupervisorBloques,
-      start: {SupervisorBloques, :start_link, [[]]},
+      id: BlockSupervisor,
+      start: {BlockSupervisor, :start_link, [[]]},
       restart: :transient
     })
 
     start_child(%{
-      id: SupervisorOrquestadores,
-      start: {SupervisorOrquestadores, :start_link, [[]]},
+      id: OrchestratorSupervisor,
+      start: {OrchestratorSupervisor, :start_link, [[]]},
       restart: :transient
     })
 
     start_child(%{
-      id: Bloque.NodoDatosSupervisor,
-      start: {Bloque.NodoDatosSupervisor, :start_link, [[]]},
+      id: Block.BSupervisor,
+      start: {Block.BSupervisor, :start_link, [[]]},
       restart: :transient
     })
     port = 8080 + Enum.random(1..100)
     Logger.info("Port: #{port}")
     start_child(
-      {Plug.Cowboy, scheme: :http, plug: Clientes.ClienteHandler, options: [port: port]}
+      {Plug.Cowboy, scheme: :http, plug: Clients.ClientHandler, options: [port: port]}
     )
   end
 end

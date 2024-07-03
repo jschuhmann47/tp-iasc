@@ -1,10 +1,10 @@
-defmodule Orquestadores.OrquestadorTest do
+defmodule Orchestrators.OrchestratorTest do
   use ExUnit.Case, async: true
 
-  alias Orquestadores.Orquestador
+  alias Orchestrators.Orchestrator
 
   setup do
-    {:ok, pid} = Orquestador.start_link(%{}, 10, :orquestador_test)
+    {:ok, pid} = Orchestrator.start_link(%{}, 10, :orchestrator_test)
     %{pid: pid}
   end
 

@@ -41,6 +41,6 @@ defmodule TpIasc do
   defp configure_logging() do
     log_level = Application.get_env(:tp_iasc, :log_level, :info)
     Logger.configure(level: log_level)
-    Logger.info("Starting TpIasc with log level #{log_level}")
+    Logger.info("Starting TP with log level #{log_level}")
   end
 end

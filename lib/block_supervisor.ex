@@ -1,4 +1,4 @@
-defmodule SupervisorBloques do
+defmodule BlockSupervisor do
   use Supervisor
 
   def start_link(init_arg) do
@@ -6,17 +6,17 @@ defmodule SupervisorBloques do
   end
 
   def init(_init_arg) do
-    nodo_datos_cantidad = Application.get_env(:tp_iasc, :nodo_datos_cantidad)
+    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count)
 
     children =
-      for i <- 0..nodo_datos_cantidad do
+      for i <- 0..dictionary_count do
         Supervisor.child_spec(
           %{
-            id: {:bloque_nodo_datos_server, i},
-            start: {Bloque.NodoDatosServer, :start_link, [i]},
+            id: {:block_listener, i},
+            start: {Block.Listener, :start_link, [i]},
             restart: :transient
           },
-          id: {:bloque_nodo_datos_server, i}
+          id: {:block_listener, i}
         )
       end
 

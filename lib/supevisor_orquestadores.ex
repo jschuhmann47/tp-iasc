@@ -1,4 +1,4 @@
-defmodule SupervisorOrquestadores do
+defmodule OrchestratorSupervisor do
   use Supervisor
 
   def start_link(init_arg) do
@@ -6,32 +6,32 @@ defmodule SupervisorOrquestadores do
   end
 
   def init(_init_arg) do
-    nodo_datos_cantidad = Application.get_env(:tp_iasc, :nodo_datos_cantidad)
+    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count)
 
     children = [
       %{
-        id: Orquestador1,
-        start: {Orquestadores.Orquestador, :start_link, [[], nodo_datos_cantidad, Orquestador1]},
+        id: Orchestrator1,
+        start: {Orchestrators.Orchestrator, :start_link, [[], dictionary_count, Orchestrator1]},
         restart: :transient
       },
       %{
-        id: Orquestador2,
-        start: {Orquestadores.Orquestador, :start_link, [[], nodo_datos_cantidad, Orquestador2]},
+        id: Orchestrator2,
+        start: {Orchestrators.Orchestrator, :start_link, [[], dictionary_count, Orchestrator2]},
         restart: :transient
       },
       %{
-        id: Orquestador3,
-        start: {Orquestadores.Orquestador, :start_link, [[], nodo_datos_cantidad, Orquestador3]},
+        id: Orchestrator3,
+        start: {Orchestrators.Orchestrator, :start_link, [[], dictionary_count, Orchestrator3]},
         restart: :transient
       },
       %{
-        id: Orquestador4,
-        start: {Orquestadores.Orquestador, :start_link, [[], nodo_datos_cantidad, Orquestador4]},
+        id: Orchestrator4,
+        start: {Orchestrators.Orchestrator, :start_link, [[], dictionary_count, Orchestrator4]},
         restart: :transient
       },
       %{
-        id: Orquestador5,
-        start: {Orquestadores.Orquestador, :start_link, [[], nodo_datos_cantidad, Orquestador5]},
+        id: Orchestrator5,
+        start: {Orchestrators.Orchestrator, :start_link, [[], dictionary_count, Orchestrator5]},
         restart: :transient
       }
     ]
