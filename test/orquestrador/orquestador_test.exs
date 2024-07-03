@@ -10,7 +10,8 @@ defmodule Orquestadores.OrquestadorTest do
 
   test "puts and gets a value", %{pid: pid} do
     GenServer.cast(pid, {:put, :key1, "value1"})
-    :timer.sleep(100)  # Give some time for the cast to be processed
+    # Give some time for the cast to be processed
+    :timer.sleep(100)
     value = GenServer.call(pid, {:get, :key1})
     assert value == "value1"
   end
@@ -18,7 +19,8 @@ defmodule Orquestadores.OrquestadorTest do
   test "returns keys distribution", %{pid: pid} do
     GenServer.cast(pid, {:put, :key1, "value1"})
     GenServer.cast(pid, {:put, :key2, "value2"})
-    :timer.sleep(100)  # Give some time for the casts to be processed
+    # Give some time for the casts to be processed
+    :timer.sleep(100)
 
     keys_distribution = GenServer.call(pid, :keys_distribution)
     assert is_list(keys_distribution)

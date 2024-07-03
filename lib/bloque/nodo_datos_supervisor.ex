@@ -6,7 +6,6 @@ defmodule Bloque.NodoDatosSupervisor do
   end
 
   def init(_init_arg) do
-
     nodo_datos_cantidad = Application.get_env(:tp_iasc, :nodo_datos_cantidad)
     # TODO: Aqui se deberia definir el tema de la replicacion de los nodos de datos?
 
