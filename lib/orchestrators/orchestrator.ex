@@ -2,12 +2,14 @@ defmodule Orchestrators.Orchestrator do
   use GenServer
   require Logger
 
-  @dictionary_registry TpIasc.Registry
+  @dictionary_registry TpIasc.Registry # think that this should go elsewhere
+  @is_master false
 
   def start_link(initial_state, dictionary_count, name) do
     GenServer.start_link(__MODULE__, {initial_state, dictionary_count}, name: name)
   end
 
+  # TODO add is master here
   def init({state, dictionary_count}) do
     {:ok, %{state: state, dictionary_count: dictionary_count}}
   end
