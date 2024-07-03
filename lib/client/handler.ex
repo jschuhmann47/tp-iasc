@@ -3,16 +3,20 @@ defmodule Clients.ClientHandler do
 
   plug(:match)
   plug(:dispatch)
-
-  get "/" do
-    send_resp(conn, 200, "Welcome")
+  get "/ping" do
+    send_resp(conn, 200, "pong")
   end
 
-  put "/" do
-    send_resp(conn, 201, "Updated key")
+  # TODO: communicate with an orchestrator to do real get/put
+  get "/:key" do
+    send_resp(conn, 200, "Got #{key}")
+  end
+
+  put "/:key/:value" do
+    send_resp(conn, 201, "Updated key #{key} with value #{value}")
   end
 
   match _ do
-    send_resp(conn, 404, "Oops!")
+    send_resp(conn, 404, "Route does not exist")
   end
 end

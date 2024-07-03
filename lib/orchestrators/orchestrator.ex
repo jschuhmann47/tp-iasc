@@ -16,12 +16,12 @@ defmodule Orchestrators.Orchestrator do
     %{dictionary_count: dictionary_count} = state_data
     node_number = node_number_from_key(key, dictionary_count)
 
-    case Horde.Registry.lookup(@dictionary_registry, node_number) do
+    case get_node_from_number(node_number) do
       [{pid, _value}] ->
         value = GenServer.call(pid, {:get, key})
         {:reply, value, state_data}
 
-      [] ->
+      nil ->
         {:reply, :not_found, state_data}
     end
   end
@@ -42,12 +42,12 @@ defmodule Orchestrators.Orchestrator do
     %{dictionary_count: dictionary_count} = state_data
     node_number = node_number_from_key(key, dictionary_count)
 
-    case Horde.Registry.lookup(@dictionary_registry, node_number) do
+    case get_node_from_number(node_number) do
       [{pid, _value}] ->
         GenServer.cast(pid, {:put, key, value})
         {:noreply, state_data}
 
-      [] ->
+      nil ->
         Logger.error("No process found for node_number #{node_number}")
         {:noreply, state_data}
     end
@@ -55,5 +55,18 @@ defmodule Orchestrators.Orchestrator do
 
   def node_number_from_key(key, node_quantity) do
     :erlang.phash2(key, node_quantity)
+  end
+
+  def get_node_from_number(node_number) do
+    exists = case Horde.Registry.lookup(@dictionary_registry, node_number) do
+      [] -> false
+      _ -> true
+    end
+    if exists do
+      Horde.Registry.lookup(@dictionary_registry, node_number) |> List.first |> elem(0)
+    else
+      Logger.info("Non existing node_number #{node_number}")
+      nil
+    end
   end
 end
