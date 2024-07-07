@@ -4,7 +4,7 @@ defmodule Orchestrators.OrchestratorTest do
   alias Orchestrators.Orchestrator
 
   setup do
-    {:ok, pid} = Orchestrator.start_link(%{}, 10, :orchestrator_test)
+    {:ok, pid} = Orchestrator.init({%{}, 10})
     %{pid: pid}
   end
 

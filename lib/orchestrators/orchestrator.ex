@@ -12,6 +12,10 @@ defmodule Orchestrators.Orchestrator do
     {:ok, %{state: state, dictionary_count: dictionary_count}}
   end
 
+  def handle_call({:ping}, _from, state) do
+    {:reply, :pong, state}
+  end
+
   def handle_call({:get, key}, _from, state_data) do
     %{dictionary_count: dictionary_count} = state_data
     node_number = node_number_from_key(key, dictionary_count)

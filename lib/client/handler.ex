@@ -5,6 +5,7 @@ defmodule Clients.ClientHandler do
   plug(:dispatch)
 
   get "/ping" do
+    :pong = GenServer.call(Orchestrator1, {:ping})
     send_resp(conn, 200, "pong")
   end
 
