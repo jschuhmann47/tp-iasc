@@ -3,13 +3,11 @@ defmodule Orchestrators.Orchestrator do
   require Logger
 
   @dictionary_registry TpIasc.Registry # think that this should go elsewhere
-  @is_master false
 
   def start_link(initial_state, dictionary_count, name) do
     GenServer.start_link(__MODULE__, {initial_state, dictionary_count}, name: name)
   end
 
-  # TODO add is master here
   def init({state, dictionary_count}) do
     {:ok, %{state: state, dictionary_count: dictionary_count}}
   end
@@ -23,7 +21,7 @@ defmodule Orchestrators.Orchestrator do
         value = GenServer.call(pid, {:get, key})
         {:reply, value, state_data}
 
-      nil ->
+      [] ->
         {:reply, :not_found, state_data}
     end
   end
@@ -49,7 +47,7 @@ defmodule Orchestrators.Orchestrator do
         GenServer.cast(pid, {:put, key, value})
         {:noreply, state_data}
 
-      nil ->
+      [] ->
         Logger.error("No process found for node_number #{node_number}")
         {:noreply, state_data}
     end
@@ -60,15 +58,16 @@ defmodule Orchestrators.Orchestrator do
   end
 
   def get_node_from_number(node_number) do
-    exists = case Horde.Registry.lookup(@dictionary_registry, node_number) do
-      [] -> false
-      _ -> true
-    end
-    if exists do
-      Horde.Registry.lookup(@dictionary_registry, node_number) |> List.first |> elem(0)
-    else
-      Logger.info("Non existing node_number #{node_number}")
-      nil
-    end
+    # exists = case Horde.Registry.lookup(@dictionary_registry, node_number) do
+    #   [] -> false
+    #   _ -> true
+    # end
+    # if exists do
+    #   Horde.Registry.lookup(@dictionary_registry, node_number) |> List.first |> elem(0)
+    # else
+    #   Logger.info("Non existing node_number #{node_number}")
+    #   nil
+    # end
+    Horde.Registry.lookup(@dictionary_registry, node_number)
   end
 end

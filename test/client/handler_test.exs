@@ -6,21 +6,32 @@ defmodule TpIascRouterTest do
 
   @opts ClientHandler.init([])
 
-  test "returns welcome" do
+  test "returns pong" do
     conn =
       :get
-      |> conn("/", "")
+      |> conn("/ping", "")
       |> ClientHandler.call(@opts)
 
     assert conn.state == :sent
     assert conn.status == 200
-    assert conn.resp_body == "Welcome"
+    assert conn.resp_body == "pong"
   end
 
-  test "returns uploaded" do
+  test "returns a value" do
+    conn =
+      :get
+      |> conn("/foo", "")
+      |> ClientHandler.call(@opts)
+
+    assert conn.state == :sent
+    assert conn.status == 200
+    assert conn.resp_body == "Got foo"
+  end
+
+  test "updates a value" do
     conn =
       :put
-      |> conn("/")
+      |> conn("/foo/bar")
       |> ClientHandler.call(@opts)
 
     assert conn.state == :sent
