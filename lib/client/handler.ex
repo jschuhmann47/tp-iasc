@@ -1,5 +1,4 @@
 defmodule Clients.ClientHandler do
-  alias Client.OrchestratorCaller
   use Plug.Router
 
   plug(:match)
@@ -10,12 +9,10 @@ defmodule Clients.ClientHandler do
   end
 
   get "/:key" do
-    res = OrchestratorCaller.get_key(key)
-    send_resp(conn, 200, "Got #{res}")
+    send_resp(conn, 200, "Got #{key}")
   end
 
   put "/:key/:value" do
-    OrchestratorCaller.put_key(key, value)
     send_resp(conn, 201, "Updated key #{key} with value #{value}")
   end
 
