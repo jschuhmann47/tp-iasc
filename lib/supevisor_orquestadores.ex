@@ -11,27 +11,27 @@ defmodule OrchestratorSupervisor do
     children = [
       %{
         id: Orchestrator1,
-        start: {Orchestrators.Orchestrator, :start_link, [[], dictionary_count, Orchestrator1]},
+        start: {Orchestrators.Orchestrator, :start_link, [false, dictionary_count, Orchestrator1]},
         restart: :transient
       },
       %{
         id: Orchestrator2,
-        start: {Orchestrators.Orchestrator, :start_link, [[], dictionary_count, Orchestrator2]},
+        start: {Orchestrators.Orchestrator, :start_link, [false, dictionary_count, Orchestrator2]},
         restart: :transient
       },
       %{
         id: Orchestrator3,
-        start: {Orchestrators.Orchestrator, :start_link, [[], dictionary_count, Orchestrator3]},
+        start: {Orchestrators.Orchestrator, :start_link, [false, dictionary_count, Orchestrator3]},
         restart: :transient
       },
       %{
         id: Orchestrator4,
-        start: {Orchestrators.Orchestrator, :start_link, [[], dictionary_count, Orchestrator4]},
+        start: {Orchestrators.Orchestrator, :start_link, [true, dictionary_count, Orchestrator4]},
         restart: :transient
       },
       %{
         id: Orchestrator5,
-        start: {Orchestrators.Orchestrator, :start_link, [[], dictionary_count, Orchestrator5]},
+        start: {Orchestrators.Orchestrator, :start_link, [false, dictionary_count, Orchestrator5]},
         restart: :transient
       }
     ]

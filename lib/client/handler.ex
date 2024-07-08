@@ -4,9 +4,13 @@ defmodule Clients.ClientHandler do
   plug(:match)
   plug(:dispatch)
 
+  @orchestrators [Orchestrator1, Orchestrator2, Orchestrator3, Orchestrator4, Orchestrator5]
+
+  # https://hexdocs.pm/plug/1.16.0/Plug.Router.html#module-passing-data-between-routes-and-plugs
   get "/ping" do
-    :pong = GenServer.call(Orchestrator1, {:ping})
-    send_resp(conn, 200, "pong")
+    master = Enum.find(@orchestrators, fn orchestrator -> GenServer.call(orchestrator, :is_master) end)
+    :pong = GenServer.call(master, {:ping})
+    send_resp(conn, 200, "pong from #{Atom.to_string(master)}")
   end
 
   get "/:key" do

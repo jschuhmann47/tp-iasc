@@ -4,34 +4,39 @@ defmodule Orchestrators.Orchestrator do
 
   @dictionary_registry TpIasc.Registry # think that this should go elsewhere
 
-  def start_link(initial_state, dictionary_count, name) do
-    GenServer.start_link(__MODULE__, {initial_state, dictionary_count}, name: name)
+  def start_link(is_master, dictionary_count, name) do
+    GenServer.start_link(__MODULE__, {is_master, dictionary_count}, name: name)
   end
 
-  def init({state, dictionary_count}) do
-    {:ok, %{state: state, dictionary_count: dictionary_count}}
+  def init({is_master, dictionary_count}) do
+    {:ok, %{is_master: is_master, dictionary_count: dictionary_count}}
   end
 
   def handle_call({:ping}, _from, state) do
     {:reply, :pong, state}
   end
 
-  def handle_call({:get, key}, _from, state_data) do
-    %{dictionary_count: dictionary_count} = state_data
+  def handle_call(:is_master, _from, state) do
+    %{is_master: is_master} = state
+    {:reply, is_master, state}
+  end
+
+  def handle_call({:get, key}, _from, state) do
+    %{dictionary_count: dictionary_count} = state
     node_number = node_number_from_key(key, dictionary_count)
 
     case get_node_from_number(node_number) do
       [{pid, _value}] ->
         value = GenServer.call(pid, {:get, key})
-        {:reply, value, state_data}
+        {:reply, value, state}
 
       [] ->
-        {:reply, :not_found, state_data}
+        {:reply, :not_found, state}
     end
   end
 
-  def handle_call(:keys_distribution, _from, state_data) do
-    %{dictionary_count: dictionary_count} = state_data
+  def handle_call(:keys_distribution, _from, state) do
+    %{dictionary_count: dictionary_count} = state
 
     keys_distribution =
       Enum.map(0..(dictionary_count - 1), fn node_number ->
@@ -39,21 +44,21 @@ defmodule Orchestrators.Orchestrator do
         {node_number, keys}
       end)
 
-    {:reply, keys_distribution, state_data}
+    {:reply, keys_distribution, state}
   end
 
-  def handle_cast({:put, key, value}, state_data) do
-    %{dictionary_count: dictionary_count} = state_data
+  def handle_cast({:put, key, value}, state) do
+    %{dictionary_count: dictionary_count} = state
     node_number = node_number_from_key(key, dictionary_count)
 
     case get_node_from_number(node_number) do
       [{pid, _value}] ->
         GenServer.cast(pid, {:put, key, value})
-        {:noreply, state_data}
+        {:noreply, state}
 
       [] ->
         Logger.error("No process found for node_number #{node_number}")
-        {:noreply, state_data}
+        {:noreply, state}
     end
   end
 
