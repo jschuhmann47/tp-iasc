@@ -21,6 +21,9 @@ defmodule Orchestrators.Orchestrator do
     {:reply, is_master, state}
   end
 
+  # idea 1: que si el cliente no encuentra ningun master, elija a uno rand para ser nuevo master y que quede ese.
+  # idea 2: todos pinguean al master, si se cae el que le sigue numericamente se autoproclama master.
+  # idea 3: hay un proceso "elector de masters" que pinguea al master y cuando se cae elige uno nuevo.
   def handle_call({:get, key}, _from, state) do
     %{dictionary_count: dictionary_count} = state
     node_number = node_number_from_key(key, dictionary_count)
