@@ -12,7 +12,8 @@ defmodule Orchestrators.Orchestrator do
     {:ok, %{
       is_master: is_master,
       dictionary_count: dictionary_count,
-      my_name: name
+      my_name: name,
+      master_name: nil
     }}
   end
 
@@ -51,16 +52,18 @@ defmodule Orchestrators.Orchestrator do
     {:reply, keys_distribution, state}
   end
 
-  def handle_cast(:make_master, _from, state) do
+
+  def handle_cast({:set_master, master_name}, _from, state) do
     %{my_name: my_name, dictionary_count: dictionary_count} = state
     new_state = %{
-      is_master: true,
-      dictionary_count: dictionary_count,
+      is_master: my_name == master_name,
       my_name: my_name,
+      dictionary_count: dictionary_count,
+      master_name: master_name
     }
     {:noreply, new_state}
   end
-
+  
   def handle_cast({:put, key, value}, state) do
     %{dictionary_count: dictionary_count} = state
     node_number = node_number_from_key(key, dictionary_count)
