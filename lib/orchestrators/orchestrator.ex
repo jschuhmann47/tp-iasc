@@ -5,14 +5,14 @@ defmodule Orchestrators.Orchestrator do
   @dictionary_registry TpIasc.Registry # think that this should go elsewhere
 
   def start_link(is_master, dictionary_count, name) do
-    GenServer.start_link(__MODULE__, {is_master, dictionary_count}, name: name)
+    GenServer.start_link(__MODULE__, {is_master, dictionary_count, name}, name: name)
   end
 
-  def init({is_master, dictionary_count}) do
-    {:ok, %{is_master: is_master, dictionary_count: dictionary_count}}
+  def init({is_master, dictionary_count, name}) do
+    {:ok, %{is_master: is_master, dictionary_count: dictionary_count, global_name: name}}
   end
 
-  def handle_call({:ping}, _from, state) do
+  def handle_call(:ping, _from, state) do
     {:reply, :pong, state}
   end
 
@@ -21,9 +21,7 @@ defmodule Orchestrators.Orchestrator do
     {:reply, is_master, state}
   end
 
-  # idea 1: que si el cliente no encuentra ningun master, elija a uno rand para ser nuevo master y que quede ese.
   # idea 2: todos pinguean al master, si se cae el que le sigue numericamente se autoproclama master.
-  # idea 3: hay un proceso "elector de masters" que pinguea al master y cuando se cae elige uno nuevo.
   def handle_call({:get, key}, _from, state) do
     %{dictionary_count: dictionary_count} = state
     node_number = node_number_from_key(key, dictionary_count)

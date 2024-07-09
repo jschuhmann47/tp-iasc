@@ -9,7 +9,7 @@ defmodule Clients.ClientHandler do
   # https://hexdocs.pm/plug/1.16.0/Plug.Router.html#module-passing-data-between-routes-and-plugs
   get "/ping" do
     master = Enum.find(@orchestrators, fn orchestrator -> GenServer.call(orchestrator, :is_master) end)
-    :pong = GenServer.call(master, {:ping})
+    :pong = GenServer.call(master, :ping)
     send_resp(conn, 200, "pong from #{Atom.to_string(master)}")
   end
 
