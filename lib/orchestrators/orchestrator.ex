@@ -101,11 +101,15 @@ defmodule Orchestrators.Orchestrator do
   end
 
   def handle_info(:ping_master, state) do
-    %{master_name: master_name} = state
-    res = GenServer.call(master_name, :ping)
-    case res do
-      :pong -> {:noreply, state}
-      _ -> select_master(state)
+    %{master_name: master_name, is_master: is_master} = state
+    unless is_master do
+      res = GenServer.call(master_name, :ping)
+      case res do
+        :pong -> {:noreply, state}
+        _ -> select_master(state)
+      end
+    else
+      {:noreply, state}
     end
   end
 
