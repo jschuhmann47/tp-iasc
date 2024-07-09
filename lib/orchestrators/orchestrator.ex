@@ -9,7 +9,12 @@ defmodule Orchestrators.Orchestrator do
   end
 
   def init({is_master, dictionary_count, name}) do
-    {:ok, %{is_master: is_master, dictionary_count: dictionary_count, global_name: name}}
+    {:ok, %{
+      is_master: is_master,
+      dictionary_count: dictionary_count,
+      my_name: name,
+      master_name: nil
+    }}
   end
 
   def handle_call(:ping, _from, state) do
@@ -21,7 +26,6 @@ defmodule Orchestrators.Orchestrator do
     {:reply, is_master, state}
   end
 
-  # idea 2: todos pinguean al master, si se cae el que le sigue numericamente se autoproclama master.
   def handle_call({:get, key}, _from, state) do
     %{dictionary_count: dictionary_count} = state
     node_number = node_number_from_key(key, dictionary_count)
@@ -48,6 +52,18 @@ defmodule Orchestrators.Orchestrator do
     {:reply, keys_distribution, state}
   end
 
+
+  def handle_cast({:set_master, master_name}, _from, state) do
+    %{my_name: my_name, dictionary_count: dictionary_count} = state
+    new_state = %{
+      is_master: my_name == master_name,
+      my_name: my_name,
+      dictionary_count: dictionary_count,
+      master_name: master_name
+    }
+    {:noreply, new_state}
+  end
+  
   def handle_cast({:put, key, value}, state) do
     %{dictionary_count: dictionary_count} = state
     node_number = node_number_from_key(key, dictionary_count)
