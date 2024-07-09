@@ -103,9 +103,11 @@ defmodule Orchestrators.Orchestrator do
   def handle_info(:ping_master, state) do
     %{master_name: master_name, is_master: is_master} = state
     unless is_master or master_name == nil do
-      res = GenServer.call(master_name, :ping)
+      res = GenServer.call(master_name, :is_master)
       case res do
-        :pong -> {:noreply, state}
+        true -> {:noreply, state}
+        # this covers "false" (the ex-master has been restarted, but it isn't master anymore)
+        # as well as errors (it hasn't been restarted)
         _ -> select_master(state)
       end
     else
