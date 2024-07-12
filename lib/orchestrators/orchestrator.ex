@@ -3,16 +3,25 @@ defmodule Orchestrators.Orchestrator do
   require Logger
 
   @dictionary_registry TpIasc.Registry # think that this should go elsewhere
+  @orchestrators [Orchestrator1, Orchestrator2, Orchestrator3, Orchestrator4, Orchestrator5]
 
-  def start_link(is_master, dictionary_count, name) do
-    GenServer.start_link(__MODULE__, {is_master, dictionary_count}, name: name)
+  def start_link(dictionary_count, name) do
+    GenServer.start_link(__MODULE__, {dictionary_count, name}, name: name)
   end
 
-  def init({is_master, dictionary_count}) do
-    {:ok, %{is_master: is_master, dictionary_count: dictionary_count}}
+  def init({dictionary_count, name}) do
+    # this is so it's unlikely for two orchestrators to initiate selection at the same time
+    interval = 4000 + :rand.uniform 2000
+    :timer.send_interval(interval, :ping_master)
+    {:ok, %{
+      is_master: false,
+      dictionary_count: dictionary_count,
+      my_name: name,
+      master_name: nil
+    }}
   end
 
-  def handle_call({:ping}, _from, state) do
+  def handle_call(:ping, _from, state) do
     {:reply, :pong, state}
   end
 
@@ -21,9 +30,6 @@ defmodule Orchestrators.Orchestrator do
     {:reply, is_master, state}
   end
 
-  # idea 1: que si el cliente no encuentra ningun master, elija a uno rand para ser nuevo master y que quede ese.
-  # idea 2: todos pinguean al master, si se cae el que le sigue numericamente se autoproclama master.
-  # idea 3: hay un proceso "elector de masters" que pinguea al master y cuando se cae elige uno nuevo.
   def handle_call({:get, key}, _from, state) do
     %{dictionary_count: dictionary_count} = state
     node_number = node_number_from_key(key, dictionary_count)
@@ -48,6 +54,17 @@ defmodule Orchestrators.Orchestrator do
       end)
 
     {:reply, keys_distribution, state}
+  end
+
+  def handle_cast({:set_master, master_name}, state) do
+    %{my_name: my_name, dictionary_count: dictionary_count} = state
+    new_state = %{
+      is_master: my_name == master_name,
+      my_name: my_name,
+      dictionary_count: dictionary_count,
+      master_name: master_name
+    }
+    {:noreply, new_state}
   end
 
   def handle_cast({:put, key, value}, state) do
@@ -81,5 +98,40 @@ defmodule Orchestrators.Orchestrator do
     #   nil
     # end
     Horde.Registry.lookup(@dictionary_registry, node_number)
+  end
+
+  def handle_info(:ping_master, state) do
+    %{master_name: master_name, is_master: is_master} = state
+    unless is_master or master_name == nil do
+      res = GenServer.call(master_name, :is_master)
+      case res do
+        true -> {:noreply, state}
+        # this covers "false" (the ex-master has been restarted, but it isn't master anymore)
+        # as well as errors (it hasn't been restarted)
+        _ -> select_master(state)
+      end
+    else
+      {:noreply, state}
+    end
+  end
+
+  defp select_master(state) do
+    %{master_name: master_name, my_name: my_name, dictionary_count: dictionary_count} = state
+    next_master_name = next_master_name(master_name)
+    everyone_but_me = @orchestrators |> Enum.reject(fn o -> o == my_name end)
+    everyone_but_me |> Enum.each(fn o -> GenServer.cast(o, {:set_master, next_master_name}) end)
+    new_state = %{
+      is_master: my_name == master_name,
+      my_name: my_name,
+      dictionary_count: dictionary_count,
+      master_name: master_name
+    }
+    {:noreply, new_state}
+  end
+
+  defp next_master_name(current_master_name) do
+    current_id = current_master_name |> Atom.to_string |> String.last |> String.to_integer
+    next_id = 1 + rem current_id, 5
+    "Elixir.Orchestrator#{next_id}" |> String.to_atom
   end
 end
