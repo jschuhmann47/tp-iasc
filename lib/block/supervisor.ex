@@ -1,4 +1,4 @@
-defmodule Block.BSupervisor do
+defmodule Block.DictionarySupervisor do
   use Supervisor
 
   def start_link(init_arg) do

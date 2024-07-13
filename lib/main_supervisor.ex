@@ -37,8 +37,8 @@ defmodule MainSupervisor do
     })
 
     start_child(%{
-      id: Block.BSupervisor,
-      start: {Block.BSupervisor, :start_link, [[]]},
+      id: Block.DictionarySupervisor,
+      start: {Block.DictionarySupervisor, :start_link, [[]]},
       restart: :transient
     })
 
