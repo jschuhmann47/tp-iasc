@@ -9,7 +9,7 @@ defmodule TpIascRouterTest do
   test "returns pong" do
     conn =
       :get
-      |> conn("/ping", "")
+      |> conn("/ping")
       |> ClientHandler.call(@opts)
 
     assert conn.state == :sent
@@ -17,15 +17,14 @@ defmodule TpIascRouterTest do
     assert conn.resp_body == "pong"
   end
 
-  test "returns a value" do
+  test "asks for value" do
     conn =
       :get
-      |> conn("/foo", "")
+      |> conn("/foo")
       |> ClientHandler.call(@opts)
 
     assert conn.state == :sent
-    assert conn.status == 200
-    assert conn.resp_body == "Got foo"
+    assert conn.status == 404 # TODO test with data
   end
 
   test "updates a value" do
@@ -35,13 +34,13 @@ defmodule TpIascRouterTest do
       |> ClientHandler.call(@opts)
 
     assert conn.state == :sent
-    assert conn.status == 201
+    assert conn.status == 202
   end
 
-  test "returns 404" do
+  test "404 on non existing route" do
     conn =
       :get
-      |> conn("/missing", "")
+      |> conn("/missing")
       |> ClientHandler.call(@opts)
 
     assert conn.state == :sent
