@@ -20,6 +20,16 @@ defmodule Clients.ClientHandler do
     end
   end
 
+  get "/lesser/:key" do
+    res = GenServer.call(get_master(), {:get_lesser, key})
+    send_resp(conn, 418, "values for #{key}: #{res}")
+  end
+
+  get "/greater/:key" do
+    res = GenServer.call(get_master(), {:get_greater, key})
+    send_resp(conn, 418, "TODO")
+  end
+
   put "/:key/:value" do
     GenServer.cast(get_master(), {:put, key, value})
     send_resp(conn, 202, "Updated key #{key} with value #{value}")
