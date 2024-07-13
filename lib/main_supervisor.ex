@@ -41,7 +41,7 @@ defmodule MainSupervisor do
       start: {Block.BSupervisor, :start_link, [[]]},
       restart: :transient
     })
-    port = 8080 + Enum.random(1..100)
+    port = 8080 # + Enum.random(1..100)
     Logger.info("Port: #{port}")
     start_child(
       {Plug.Cowboy, scheme: :http, plug: Clients.ClientHandler, options: [port: port]}
