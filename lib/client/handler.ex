@@ -14,7 +14,10 @@ defmodule Clients.ClientHandler do
 
   get "/:key" do
     res = GenServer.call(get_master(), {:get, key})
-    send_resp(conn, 200, "Got #{res}")
+    case res do
+      nil -> send_resp(conn, 404, "Not found")
+      res -> send_resp(conn, 200, "Got #{res}")
+    end
   end
 
   put "/:key/:value" do
