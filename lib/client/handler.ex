@@ -22,7 +22,7 @@ defmodule Clients.ClientHandler do
 
   put "/:key/:value" do
     GenServer.cast(get_master(), {:put, key, value})
-    send_resp(conn, 201, "Updated key #{key} with value #{value}")
+    send_resp(conn, 202, "Updated key #{key} with value #{value}")
   end
 
   match _ do
