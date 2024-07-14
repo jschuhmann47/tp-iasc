@@ -6,7 +6,6 @@ defmodule Clients.ClientHandler do
 
   @orchestrators [Orchestrator1, Orchestrator2, Orchestrator3, Orchestrator4, Orchestrator5]
 
-  # https://hexdocs.pm/plug/1.16.0/Plug.Router.html#module-passing-data-between-routes-and-plugs
   get "/ping" do
     :pong = GenServer.call(get_master(), :ping)
     send_resp(conn, 200, "pong")
@@ -22,12 +21,18 @@ defmodule Clients.ClientHandler do
 
   get "/lesser/:key" do
     res = GenServer.call(get_master(), {:get_lesser, key})
-    send_resp(conn, 200, "lesser values for #{key}: #{res}")
+    case res do
+      [] -> send_resp(conn, 404, "Not found")
+      res -> send_resp(conn, 200, "lesser values for #{key}: #{Enum.join(res, " ")}")
+    end
   end
 
   get "/greater/:key" do
     res = GenServer.call(get_master(), {:get_greater, key})
-    send_resp(conn, 200, "greater values for #{key}: #{res}")
+    case res do
+      [] -> send_resp(conn, 404, "Not found")
+      res -> send_resp(conn, 200, "greater values for #{key}: #{Enum.join(res, " ")}")
+    end
   end
 
   put "/:key/:value" do

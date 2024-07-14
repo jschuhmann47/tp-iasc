@@ -49,12 +49,11 @@ defmodule Orchestrators.Orchestrator do
 
   def handle_call({:get_lesser, key}, _from, state) do
     %{dictionary_count: dictionary_count} = state
+    # limit_node = node_number_from_key(key, dictionary_count)
 
     res =
       0..dictionary_count
       |> Enum.map(fn x -> aux(x, {:get_lesser, key}) end)
-      # TODO: if we know by hash that key 'x' goes to node y, we should search from 0 to y instead of all nodes (same with greater)
-      # |> Enum.map(fn {pid, _value} -> GenServer.call(pid, {:get_lesser, key}) end)
       |> List.flatten()
 
     {:reply, res, state}
@@ -62,12 +61,11 @@ defmodule Orchestrators.Orchestrator do
 
   def handle_call({:get_greater, key}, _from, state) do
     %{dictionary_count: dictionary_count} = state
+    # limit_node = node_number_from_key(key, dictionary_count) # this optimiztions causes some bugs (i think)
 
     res =
       0..dictionary_count
       |> Enum.map(fn x -> aux(x, {:get_greater, key}) end)
-      # TODO: if we know by hash that key 'x' goes to node y, we should search from 0 to y instead of all nodes (same with greater)
-      # |> Enum.map(fn {pid, _value} -> GenServer.call(pid, {:get_lesser, key}) end)
       |> List.flatten()
 
     {:reply, res, state}
