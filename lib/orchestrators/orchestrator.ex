@@ -36,15 +36,7 @@ defmodule Orchestrators.Orchestrator do
   def handle_call({:get, key}, _from, state) do
     %{dictionary_count: dictionary_count} = state
     node_number = node_number_from_key(key, dictionary_count)
-
-    case get_node_from_number(node_number) do
-      [{pid, _value}] ->
-        value = GenServer.call(pid, {:get, key})
-        {:reply, value, state}
-
-      [] ->
-        {:reply, :not_found, state}
-    end
+    {:reply, call_action_to_node(node_number, {:get, key}), state}
   end
 
   def handle_call({:get_lesser, key}, _from, state) do
@@ -53,7 +45,7 @@ defmodule Orchestrators.Orchestrator do
 
     res =
       0..dictionary_count
-      |> Enum.map(fn x -> aux(x, {:get_lesser, key}) end)
+      |> Enum.map(fn x -> call_action_to_node(x, {:get_lesser, key}) end)
       |> List.flatten()
 
     {:reply, res, state}
@@ -62,32 +54,22 @@ defmodule Orchestrators.Orchestrator do
   def handle_call({:get_greater, key}, _from, state) do
     %{dictionary_count: dictionary_count} = state
 
-    # limit_node = node_number_from_key(key, dictionary_count) # this optimiztions causes some bugs (i think)
+    # limit_node = node_number_from_key(key, dictionary_count) # this optimizations causes some bugs (i think)
 
     res =
       0..dictionary_count
-      |> Enum.map(fn x -> aux(x, {:get_greater, key}) end)
+      |> Enum.map(fn x -> call_action_to_node(x, {:get_greater, key}) end)
       |> List.flatten()
 
     {:reply, res, state}
   end
 
-  def aux(n, action) do
-    case get_node_from_number(n) do
-      [{pid, _value}] ->
-        GenServer.call(pid, action)
-
-      [] ->
-        ""
-    end
-  end
-
-  def handle_call(:keys_distribution, _from, state) do
+  def handle_call({:keys_distribution}, _from, state) do
     %{dictionary_count: dictionary_count} = state
 
     keys_distribution =
-      Enum.map(0..(dictionary_count - 1), fn node_number ->
-        keys = Block.Listener.keys(node_number)
+      0..dictionary_count |> Enum.map(fn node_number ->
+        keys = call_action_to_node(node_number, {:keys_distribution})
         {node_number, keys}
       end)
 
@@ -111,14 +93,27 @@ defmodule Orchestrators.Orchestrator do
     %{dictionary_count: dictionary_count} = state
     node_number = node_number_from_key(key, dictionary_count)
 
-    case get_node_from_number(node_number) do
+    cast_action_to_node(node_number, {:put, key, value})
+    {:noreply, state}
+  end
+
+  defp call_action_to_node(n, action) do
+    case get_node_from_number(n) do
       [{pid, _value}] ->
-        GenServer.cast(pid, {:put, key, value})
-        {:noreply, state}
+        GenServer.call(pid, action)
 
       [] ->
-        Logger.error("No process found for node_number #{node_number}")
-        {:noreply, state}
+        Logger.error("Cannot call action: No process found for node_number #{n}")
+        nil
+    end
+  end
+
+  defp cast_action_to_node(n, action) do
+    case get_node_from_number(n) do
+      [{pid, _value}] ->
+        GenServer.cast(pid, action)
+      [] ->
+        Logger.error("Cannot cast action: No process found for node_number #{n}")
     end
   end
 
@@ -127,16 +122,6 @@ defmodule Orchestrators.Orchestrator do
   end
 
   def get_node_from_number(node_number) do
-    # exists = case Horde.Registry.lookup(@dictionary_registry, node_number) do
-    #   [] -> false
-    #   _ -> true
-    # end
-    # if exists do
-    #   Horde.Registry.lookup(@dictionary_registry, node_number) |> List.first |> elem(0)
-    # else
-    #   Logger.info("Non existing node_number #{node_number}")
-    #   nil
-    # end
     Horde.Registry.lookup(@dictionary_registry, node_number)
   end
 

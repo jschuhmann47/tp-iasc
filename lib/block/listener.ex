@@ -39,7 +39,7 @@ defmodule Block.Listener do
     {:reply, value, node_id}
   end
 
-  def handle_call(:keys, _from, node_id) do
+  def handle_call({:keys_distribution}, _from, node_id) do
     keys = Block.Dictionary.keys({:global, {:block_dictionary, node_id}})
     {:reply, keys, node_id}
   end
