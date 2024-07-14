@@ -4,7 +4,7 @@ defmodule Clients.ClientHandler do
   plug(:match)
   plug(:dispatch)
 
-  @orchestrators [Orchestrator1, Orchestrator2, Orchestrator3, Orchestrator4, Orchestrator5]
+  # @orchestrators [Orchestrator1, Orchestrator2, Orchestrator3, Orchestrator4, Orchestrator5]
 
   # TODO set it in env var
   @max_length 10
@@ -72,7 +72,7 @@ defmodule Clients.ClientHandler do
   end
 
   def get_master() do
-    Enum.find(@orchestrators, fn orchestrator -> GenServer.call(orchestrator, :is_master) end)
+    Clients.GetMaster.get_master()
   end
 
   def check_length(key) do
