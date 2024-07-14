@@ -12,14 +12,14 @@ defmodule Block.Dictionary do
     Agent.get(agent, &Map.get(&1, key))
   end
 
-  def lesser(agent, key) do
-    Logger.debug("Dictionary(#{inspect(agent)}) getting lesser than key: #{inspect(key)}")
-    Agent.get(agent, &Map.values(:maps.filter(fn k, _ -> k <= key end, &1)))
+  def lesser(agent, value) do
+    Logger.debug("Dictionary(#{inspect(agent)}) getting values lesser than: #{inspect(value)}")
+    Agent.get(agent, &Map.values(:maps.filter(fn _, v -> v < value end, &1)))
   end
 
-  def greater(agent, key) do
-    Logger.debug("Dictionary(#{inspect(agent)}) getting greater than key: #{inspect(key)}")
-    Agent.get(agent, &Map.values(:maps.filter(fn k, _ -> k >= key end, &1)))
+  def greater(agent, value) do
+    Logger.debug("Dictionary(#{inspect(agent)}) getting values greater than: #{inspect(value)}")
+    Agent.get(agent, &Map.values(:maps.filter(fn _, v -> v > value end, &1)))
   end
 
   def update(agent, key, value) do

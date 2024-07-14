@@ -39,26 +39,22 @@ defmodule Orchestrators.Orchestrator do
     {:reply, call_action_to_node(node_number, {:get, key}), state}
   end
 
-  def handle_call({:get_lesser, key}, _from, state) do
+  def handle_call({:get_lesser, value}, _from, state) do
     %{dictionary_count: dictionary_count} = state
-    # limit_node = node_number_from_key(key, dictionary_count)
-
     res =
       0..dictionary_count
-      |> Enum.map(fn x -> call_action_to_node(x, {:get_lesser, key}) end)
+      |> Enum.map(fn x -> call_action_to_node(x, {:get_lesser, value}) end)
       |> List.flatten()
 
     {:reply, res, state}
   end
 
-  def handle_call({:get_greater, key}, _from, state) do
+  def handle_call({:get_greater, value}, _from, state) do
     %{dictionary_count: dictionary_count} = state
-
-    # limit_node = node_number_from_key(key, dictionary_count) # this optimizations causes some bugs (i think)
 
     res =
       0..dictionary_count
-      |> Enum.map(fn x -> call_action_to_node(x, {:get_greater, key}) end)
+      |> Enum.map(fn x -> call_action_to_node(x, {:get_greater, value}) end)
       |> List.flatten()
 
     {:reply, res, state}

@@ -27,28 +27,28 @@ defmodule Clients.ClientHandler do
     end
   end
 
-  get "/lesser/:key" do
-    if check_length(key) do
-      send_resp(conn, 401, "Key exceeds max length")
+  get "/lesser/:value" do
+    if check_length(value) do
+      send_resp(conn, 401, "Value exceeds max length")
     else
-      res = GenServer.call(get_master(), {:get_lesser, key})
+      res = GenServer.call(get_master(), {:get_lesser, value})
 
       case res do
         [] -> send_resp(conn, 404, "Not found")
-        res -> send_resp(conn, 200, "lesser values for #{key}: #{Enum.join(res, " ")}")
+        res -> send_resp(conn, 200, "Lesser values than #{value}: #{Enum.join(res, " ")}")
       end
     end
   end
 
-  get "/greater/:key" do
-    if check_length(key) do
+  get "/greater/:value" do
+    if check_length(value) do
       send_resp(conn, 401, "Key exceeds max length")
     else
-      res = GenServer.call(get_master(), {:get_greater, key})
+      res = GenServer.call(get_master(), {:get_greater, value})
 
       case res do
         [] -> send_resp(conn, 404, "Not found")
-        res -> send_resp(conn, 200, "greater values for #{key}: #{Enum.join(res, " ")}")
+        res -> send_resp(conn, 200, "Values greater than #{value}: #{Enum.join(res, " ")}")
       end
     end
   end

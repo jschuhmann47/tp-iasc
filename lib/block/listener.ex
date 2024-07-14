@@ -29,14 +29,14 @@ defmodule Block.Listener do
     {:reply, value, node_id}
   end
 
-  def handle_call({:get_lesser, key}, _from, node_id) do
-    value = Block.Dictionary.lesser({:global, {:block_dictionary, node_id}}, key)
-    {:reply, value, node_id}
+  def handle_call({:get_lesser, value}, _from, node_id) do
+    res = Block.Dictionary.lesser({:global, {:block_dictionary, node_id}}, value)
+    {:reply, res, node_id}
   end
 
-  def handle_call({:get_greater, key}, _from, node_id) do
-    value = Block.Dictionary.greater({:global, {:block_dictionary, node_id}}, key)
-    {:reply, value, node_id}
+  def handle_call({:get_greater, value}, _from, node_id) do
+    res = Block.Dictionary.greater({:global, {:block_dictionary, node_id}}, value)
+    {:reply, res, node_id}
   end
 
   def handle_call({:keys_distribution}, _from, node_id) do
