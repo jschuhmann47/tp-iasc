@@ -55,11 +55,7 @@ defmodule Clients.ClientHandler do
 
   get "/keys/distribution" do
     res = GenServer.call(get_master(), {:keys_distribution})
-
-    case res do
-      [] -> send_resp(conn, 404, "Not found")
-      res -> send_resp(conn, 200, "Key distribution: #{inspect(res)}")
-    end
+    send_resp(conn, 200, "Key distribution: #{inspect(res)}")
   end
 
   put "/:key/:value" do
