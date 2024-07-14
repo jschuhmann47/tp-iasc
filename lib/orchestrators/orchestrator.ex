@@ -61,6 +61,7 @@ defmodule Orchestrators.Orchestrator do
 
   def handle_call({:get_greater, key}, _from, state) do
     %{dictionary_count: dictionary_count} = state
+
     # limit_node = node_number_from_key(key, dictionary_count) # this optimiztions causes some bugs (i think)
 
     res =
@@ -75,6 +76,7 @@ defmodule Orchestrators.Orchestrator do
     case get_node_from_number(n) do
       [{pid, _value}] ->
         GenServer.call(pid, action)
+
       [] ->
         ""
     end

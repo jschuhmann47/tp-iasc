@@ -13,6 +13,7 @@ defmodule Clients.ClientHandler do
 
   get "/:key" do
     res = GenServer.call(get_master(), {:get, key})
+
     case res do
       nil -> send_resp(conn, 404, "Not found")
       res -> send_resp(conn, 200, "Got #{res}")
@@ -21,6 +22,7 @@ defmodule Clients.ClientHandler do
 
   get "/lesser/:key" do
     res = GenServer.call(get_master(), {:get_lesser, key})
+
     case res do
       [] -> send_resp(conn, 404, "Not found")
       res -> send_resp(conn, 200, "lesser values for #{key}: #{Enum.join(res, " ")}")
@@ -29,6 +31,7 @@ defmodule Clients.ClientHandler do
 
   get "/greater/:key" do
     res = GenServer.call(get_master(), {:get_greater, key})
+
     case res do
       [] -> send_resp(conn, 404, "Not found")
       res -> send_resp(conn, 200, "greater values for #{key}: #{Enum.join(res, " ")}")
