@@ -24,25 +24,19 @@ defmodule Block.Listener do
 
   defp via_tuple(node_id), do: {:via, Horde.Registry, {@block_listener_registry, node_id}}
 
-  # def value(node_id, key) do
-  #   GenServer.call(via_tuple(node_id), {:get, key})
-  # end
-
-  # def keys(node_id) do
-  #   GenServer.call(via_tuple(node_id), :keys)
-  # end
-
-  # def update(node_id, key, value) do
-  #   GenServer.cast(via_tuple(node_id), {:put, key, value})
-  # end
-
   def handle_call({:get, key}, _from, node_id) do
     value = Block.Dictionary.value({:global, {:block_dictionary, node_id}}, key)
     {:reply, value, node_id}
   end
 
   def handle_call({:get_lesser, key}, _from, node_id) do
-    {:reply, ["TODO", "TODO2"], node_id}
+    value = Block.Dictionary.lesser({:global, {:block_dictionary, node_id}}, key)
+    {:reply, value, node_id}
+  end
+
+  def handle_call({:get_greater, key}, _from, node_id) do
+    value = Block.Dictionary.greater({:global, {:block_dictionary, node_id}}, key)
+    {:reply, value, node_id}
   end
 
   def handle_call(:keys, _from, node_id) do

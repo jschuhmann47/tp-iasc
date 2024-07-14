@@ -22,12 +22,12 @@ defmodule Clients.ClientHandler do
 
   get "/lesser/:key" do
     res = GenServer.call(get_master(), {:get_lesser, key})
-    send_resp(conn, 418, "values for #{key}: #{res}")
+    send_resp(conn, 200, "lesser values for #{key}: #{res}")
   end
 
   get "/greater/:key" do
     res = GenServer.call(get_master(), {:get_greater, key})
-    send_resp(conn, 418, "TODO")
+    send_resp(conn, 200, "greater values for #{key}: #{res}")
   end
 
   put "/:key/:value" do

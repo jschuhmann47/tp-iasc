@@ -60,6 +60,19 @@ defmodule Orchestrators.Orchestrator do
     {:reply, res, state}
   end
 
+  def handle_call({:get_greater, key}, _from, state) do
+    %{dictionary_count: dictionary_count} = state
+
+    res =
+      0..dictionary_count
+      |> Enum.map(fn x -> aux(x, {:get_greater, key}) end)
+      # TODO: if we know by hash that key 'x' goes to node y, we should search from 0 to y instead of all nodes (same with greater)
+      # |> Enum.map(fn {pid, _value} -> GenServer.call(pid, {:get_lesser, key}) end)
+      |> List.flatten()
+
+    {:reply, res, state}
+  end
+
   def aux(n, action) do
     case get_node_from_number(n) do
       [{pid, _value}] ->
