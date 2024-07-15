@@ -6,11 +6,12 @@ defmodule Clients.GetMaster do
 
   def start_link() do
     Logger.info("GetMaster started")
-    Agent.start_link(fn -> %{} end, name: __MODULE__)
+    Agent.start_link(fn -> %{} end, name: __MODULE__) # TODO, add name and store it in registry
   end
 
+  # basically, if it's the first time asking for it, it is stored
   def get_master() do
-    {k, %{master: b}} =
+    {_, %{master: orchestrator_stored}} =
       Agent.get(
         __MODULE__,
         &Map.get_and_update(&1, :master, fn x ->
@@ -26,7 +27,6 @@ defmodule Clients.GetMaster do
           end
         end)
       )
-
-    b
+    orchestrator_stored
   end
 end

@@ -45,7 +45,7 @@ defmodule MainSupervisor do
     start_child(%{
       id: Clients.GetMaster,
       start: {Clients.GetMaster, :start_link, []},
-      restart: :permanent
+      restart: :permanent # TODO: when clientHandler dies, this should die too
     })
 
     # + Enum.random(1..100)
