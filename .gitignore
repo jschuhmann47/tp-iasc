@@ -26,3 +26,5 @@ tp_iasc-*.tar
 /tmp/
 
 .elixir_ls
+
+.tool_versions
