@@ -7,7 +7,8 @@ defmodule Clients.Supervisor do
   end
 
   def init(_init_arg) do
-    port = 8080 # + Enum.random(1..100) # Idea: if only one client is used across all nodes, use the same port and if it's in use don't do anything
+    # + Enum.random(1..100) # Idea: if only one client is used across all nodes, use the same port and if it's in use don't do anything
+    port = 8080
 
     children = [
       {Plug.Cowboy, scheme: :http, plug: Clients.ClientHandler, options: [port: port]},
@@ -19,6 +20,7 @@ defmodule Clients.Supervisor do
     ]
 
     Logger.info("Listening on port #{port}")
-    Supervisor.init(children, strategy: :rest_for_one) # rest for one so that if client dies, getMaster dies too
+    # rest for one so that if client dies, getMaster dies too
+    Supervisor.init(children, strategy: :rest_for_one)
   end
 end

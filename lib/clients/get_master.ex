@@ -6,10 +6,11 @@ defmodule Clients.GetMaster do
 
   def start_link() do
     Logger.info("GetMaster started")
-    Agent.start_link(fn -> %{} end, name: __MODULE__) # TODO, add name and store it in registry
+    # TODO, add name and store it in registry
+    Agent.start_link(fn -> %{} end, name: __MODULE__)
   end
 
-  # basically, if it's the first time asking for it, it is stored
+  # basically, if it's the first time asking for master, a reference is stored. if not it gets it.
   def get_master() do
     {_, %{master: orchestrator_stored}} =
       Agent.get(
@@ -27,6 +28,7 @@ defmodule Clients.GetMaster do
           end
         end)
       )
+
     orchestrator_stored
   end
 end
