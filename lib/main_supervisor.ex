@@ -9,8 +9,7 @@ defmodule MainSupervisor do
   end
 
   def init(init_arg) do
-    members = Enum.map(Node.list([:this, :visible]), &{__MODULE__, &1})
-    Horde.DynamicSupervisor.init([strategy: :one_for_one, members: members] ++ init_arg)
+    Horde.DynamicSupervisor.init([strategy: :one_for_one, members: :auto] ++ init_arg)
   end
 
   def start_child(child_spec) do
@@ -20,19 +19,13 @@ defmodule MainSupervisor do
   def init_child_processes do
     start_child(%{
       id: @dictionary_registry,
-      start: {Horde.Registry, :start_link, [keys: :unique, name: @dictionary_registry]},
+      start: {Horde.Registry, :start_link, [keys: :unique, name: @dictionary_registry, members: :auto]},
       restart: :permanent
     })
 
     start_child(%{
       id: BlockSupervisor,
       start: {BlockSupervisor, :start_link, [[]]},
-      restart: :transient
-    })
-
-    start_child(%{
-      id: OrchestratorSupervisor,
-      start: {OrchestratorSupervisor, :start_link, [[]]},
       restart: :transient
     })
 
@@ -47,5 +40,9 @@ defmodule MainSupervisor do
       start: {Clients.Supervisor, :start_link, [[]]},
       restart: :transient
     })
+  end
+
+  defp unique_port do
+    :rand.uniform(1000) + 8000
   end
 end

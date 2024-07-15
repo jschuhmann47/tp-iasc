@@ -4,11 +4,17 @@ defmodule Orchestrators.Orchestrator do
 
   # think that this should go elsewhere
   @dictionary_registry TpIasc.Registry
-  @orchestrators [Orchestrator1, Orchestrator2, Orchestrator3, Orchestrator4, Orchestrator5]
+  @orchestrators [] # TODO: this should from the registry
 
   def start_link(dictionary_count, name) do
-    GenServer.start_link(__MODULE__, {dictionary_count, name}, name: name)
+    GenServer.start_link(__MODULE__, {dictionary_count, name}, name: via_tuple(name))
   end
+
+  def get_orchestrator(name) do
+    Horde.Registry.lookup(@dictionary_registry, name)
+  end
+
+  def via_tuple(name), do: {:via, Horde.Registry, {@dictionary_registry, name}}
 
   def init({dictionary_count, name}) do
     # this is so it's unlikely for two orchestrators to initiate selection at the same time
@@ -129,8 +135,8 @@ defmodule Orchestrators.Orchestrator do
 
       case res do
         true -> {:noreply, state}
-        # this covers "false" (the ex-master has been restarted, but it isn't master anymore)
-        # as well as errors (it hasn't been restarted)
+           # this covers "false" (the ex-master has been restarted, but it isn't master anymore)
+          # as well as errors (it hasn't been restarted)
         _ -> select_master(state)
       end
     else

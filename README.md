@@ -31,7 +31,8 @@ mix deps.get
 Ejecutar:
 
 ```bash
-iex -S mix
+iex --name node1@127.0.0.1 -S mix
+iex --name node2@127.0.0.1 -S mix
 ```
 
 Correr tests:
@@ -45,18 +46,16 @@ iex -S mix test
 Para probar almacenar un valor y luego recuperarlo, podes usar los siguientes comandos en `iex`:
 
 ```elixir
-# Almacenar valores
-GenServer.cast(Orquestador1, {:put, "a", "b"})
-GenServer.cast(Orquestador1, {:put, "c", 15})
+# Desde el nodo 1
 
-# Recuperar valores
-GenServer.call(Orquestador1, {:get, "a"}) # => "b"
-GenServer.call(Orquestador1, {:get, "c"}) # => 15
+TpIasc.Helpers.log_all()
+GenServer.cast(Orchestrators.Orchestrator.via_tuple(:"Orchestrator_node1@127.0.0.1"), {:put, "key1", "value1"})
+GenServer.call(Orchestrators.Orchestrator.via_tuple(:"Orchestrator_node1@127.0.0.1"), {:get, "key1"})
 
-# Almacenar múltiples valores
-GenServer.cast(Orquestador1, {:put, "a", "b"})
-GenServer.cast(Orquestador1, {:put, "j", "f"})
-GenServer.cast(Orquestador1, {:put, "adsa", 158})
+# Desde el nodo 2
+
+TpIasc.Helpers.log_all()
+GenServer.call(Orchestrators.Orchestrator.via_tuple(:"Orchestrator_node2@127.0.0.1"), {:get, "key1"})
 
 # Ver distribución de claves
 GenServer.call(Orquestador1, :keys_distribution)
