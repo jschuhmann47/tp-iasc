@@ -12,7 +12,7 @@ defmodule OrchestratorSupervisor do
   end
 
   def start_orchestrator(name) do
-    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count, 2)
+    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count)
 
     child_spec = %{
       id: name,

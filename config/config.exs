@@ -1,7 +1,8 @@
 import Config
 
 config :tp_iasc,
-  nodo_datos_cantidad: 10,
+  dictionary_count: 10,
+  replication_factor: 3,
   log_level: :debug,
   http_port: 8051 # Configuración fija del puerto HTTP
 
