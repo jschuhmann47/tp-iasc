@@ -26,26 +26,44 @@ defmodule OrchestratorSupervisor do
     case Horde.DynamicSupervisor.start_child(__MODULE__, child_spec) do
       {:ok, pid} ->
         Logger.info("Started orchestrator #{name} with pid #{inspect(pid)}")
+
         if check_if_no_master() do
-          GenServer.cast(pid, {:set_master, name}) # Sets itself as master if no masters are available
+          # Sets itself as master if no masters are available
+          GenServer.cast(pid, {:set_master, name})
+        else
+          GenServer.cast(pid, {:set_master, Helpers.get_master})
         end
+
         case Horde.Registry.register(TpIasc.Registry, name, pid) do
           {:ok, registered_pid} ->
             Logger.info("Registered orchestrator #{name} with pid #{inspect(registered_pid)}")
+
             if pid != registered_pid do
-              Logger.warning("Mismatch in PIDs: started pid #{inspect(pid)}, registered pid #{inspect(registered_pid)}")
+              Logger.warning(
+                "Mismatch in PIDs: started pid #{inspect(pid)}, registered pid #{inspect(registered_pid)}"
+              )
             end
+
             {:ok, registered_pid}
+
           {:error, {:already_registered, registered_pid}} ->
-            Logger.info("Orchestrator #{name} is already registered with pid #{inspect(registered_pid)}")
+            Logger.info(
+              "Orchestrator #{name} is already registered with pid #{inspect(registered_pid)}"
+            )
+
             if pid != registered_pid do
-              Logger.warning("Mismatch in PIDs: started pid #{inspect(pid)}, already registered pid #{inspect(registered_pid)}")
+              Logger.warning(
+                "Mismatch in PIDs: started pid #{inspect(pid)}, already registered pid #{inspect(registered_pid)}"
+              )
             end
+
             {:ok, registered_pid}
         end
+
       {:error, {:already_started, pid}} ->
         Logger.info("Orchestrator #{name} is already started with pid #{inspect(pid)}")
         {:ok, pid}
+
       {:error, reason} ->
         Logger.error("Failed to start orchestrator #{name}: #{inspect(reason)}")
         {:error, reason}

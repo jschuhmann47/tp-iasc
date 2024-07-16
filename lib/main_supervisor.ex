@@ -19,7 +19,8 @@ defmodule MainSupervisor do
   def init_child_processes do
     start_child(%{
       id: @dictionary_registry,
-      start: {Horde.Registry, :start_link, [keys: :unique, name: @dictionary_registry, members: :auto]},
+      start:
+        {Horde.Registry, :start_link, [keys: :unique, name: @dictionary_registry, members: :auto]},
       restart: :permanent
     })
 
