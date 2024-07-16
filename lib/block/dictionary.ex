@@ -2,7 +2,10 @@ defmodule Block.Dictionary do
   use Agent
   require Logger
 
-  def start_link(name) do
+  @block_dictionary_registry TpIasc.Registry
+
+  def start_link({id, replica}) do
+    name = via_tuple({:block_dictionary, id, replica})
     Logger.info("Dictionary started with name: #{inspect(name)}")
     Agent.start_link(fn -> %{} end, name: name)
   end
@@ -13,10 +16,7 @@ defmodule Block.Dictionary do
   end
 
   def update(agent, key, value) do
-    Logger.debug(
-      "Dictionary(#{inspect(agent)}) updating key: #{inspect(key)} with value: #{inspect(value)}"
-    )
-
+    Logger.debug("Dictionary(#{inspect(agent)}) updating key: #{inspect(key)} with value: #{inspect(value)}")
     Agent.update(agent, &Map.put(&1, key, value))
   end
 
@@ -32,4 +32,7 @@ defmodule Block.Dictionary do
   def values(agent) do
     Agent.get(agent, &Map.values(&1))
   end
+
+  def via_tuple({:block_dictionary, id, replica}), do: {:via, Horde.Registry, {@block_dictionary_registry, {:block_dictionary, id, replica}}}
+  def via_tuple({:block_dictionary, id}), do: {:via, Horde.Registry, {@block_dictionary_registry, {:block_dictionary, id}}}
 end

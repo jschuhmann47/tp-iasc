@@ -10,10 +10,6 @@ defmodule Orchestrators.Orchestrator do
     GenServer.start_link(__MODULE__, {dictionary_count, name}, name: via_tuple(name))
   end
 
-  def get_orchestrator(name) do
-    Horde.Registry.lookup(@dictionary_registry, name)
-  end
-
   def via_tuple(name), do: {:via, Horde.Registry, {@dictionary_registry, name}}
 
   def init({dictionary_count, name}) do

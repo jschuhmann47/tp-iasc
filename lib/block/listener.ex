@@ -24,30 +24,31 @@ defmodule Block.Listener do
 
   defp via_tuple(node_id), do: {:via, Horde.Registry, {@block_listener_registry, node_id}}
 
-  # def value(node_id, key) do
-  #   GenServer.call(via_tuple(node_id), {:get, key})
-  # end
-
-  # def keys(node_id) do
-  #   GenServer.call(via_tuple(node_id), :keys)
-  # end
-
-  # def update(node_id, key, value) do
-  #   GenServer.cast(via_tuple(node_id), {:put, key, value})
-  # end
-
   def handle_call({:get, key}, _from, node_id) do
-    value = Block.Dictionary.value({:global, {:block_dictionary, node_id}}, key)
+    agent_name = Block.Dictionary.via_tuple({:block_dictionary, node_id})
+    Logger.debug("Getting key #{inspect(key)} from dictionary #{inspect(agent_name)}")
+    value = Block.Dictionary.value(agent_name, key)
     {:reply, value, node_id}
   end
 
   def handle_call(:keys, _from, node_id) do
-    keys = Block.Dictionary.keys({:global, {:block_dictionary, node_id}})
+    agent_name = Block.Dictionary.via_tuple({:block_dictionary, node_id})
+    Logger.debug("Getting keys from dictionary #{inspect(agent_name)}")
+    keys = Block.Dictionary.keys(agent_name)
     {:reply, keys, node_id}
   end
 
   def handle_cast({:put, key, value}, node_id) do
-    Block.Dictionary.update({:global, {:block_dictionary, node_id}}, key, value)
+    send_to_all_replicas(node_id, key, value)
     {:noreply, node_id}
+  end
+
+  defp send_to_all_replicas(node_id, key, value) do
+    1..3
+    |> Enum.each(fn replica ->
+      agent_name = Block.Dictionary.via_tuple({:block_dictionary, node_id, replica})
+      Logger.debug("Sending key #{inspect(key)} with value #{inspect(value)} to replica #{inspect(agent_name)}")
+      Block.Dictionary.update(agent_name, key, value)
+    end)
   end
 end

@@ -26,6 +26,7 @@ defmodule TpIasc do
     |> case do
       {:ok, pid} ->
         start_supervised_processes()
+        monitor_cluster_membership()
         start_orchestrator()
         {:ok, pid}
 
@@ -35,19 +36,13 @@ defmodule TpIasc do
   end
 
   defp start_supervised_processes do
-        # Esperar un momento para asegurarse de que todos los nodos se hayan unido al clúster
-        :timer.sleep(2000)
+    :timer.sleep(2000)
 
-        # Iniciar MainSupervisor y sus procesos hijos
     MainSupervisor.start_link([])
     MainSupervisor.init_child_processes()
-  end
 
-  defp assign_random_master do
-    :timer.sleep(1000)
-    orchestrators = [Orchestrator1, Orchestrator2, Orchestrator3, Orchestrator4, Orchestrator5]
-    random_orchestrator = Enum.random(orchestrators)
-    orchestrators |> Enum.each(fn o -> GenServer.cast(o, {:set_master, random_orchestrator}) end)
+    Block.DictionarySupervisor.start_link([])
+    Block.DictionarySupervisor.start_dictionaries()
   end
 
   defp start_orchestrator do
@@ -76,6 +71,10 @@ defmodule TpIasc do
     end
   end
 
+  defp monitor_cluster_membership do
+    :net_kernel.monitor_nodes(true)
+  end
+
   def name_application() do
     Process.register(self(), TpIasc)
   end
@@ -84,5 +83,17 @@ defmodule TpIasc do
     log_level = Application.get_env(:tp_iasc, :log_level)
     Logger.configure(level: log_level)
     Logger.info("Starting TP with log level #{log_level}")
+  end
+
+  def handle_info({:nodeup, _node}, state) do
+    Logger.info("Node joined the cluster")
+    Block.DictionarySupervisor.adjust_all_replications()
+    {:noreply, state}
+  end
+
+  def handle_info({:nodedown, _node}, state) do
+    Logger.info("Node left the cluster")
+    Block.DictionarySupervisor.adjust_all_replications()
+    {:noreply, state}
   end
 end
