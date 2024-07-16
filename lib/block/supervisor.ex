@@ -6,7 +6,7 @@ defmodule Block.DictionarySupervisor do
   end
 
   def init(_init_arg) do
-    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count)
+    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count, 10)
     # TODO: Aqui se deberia definir el tema de la replicacion de los nodos de datos?
 
     children =

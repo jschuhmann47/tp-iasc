@@ -6,7 +6,7 @@ defmodule TpIasc do
     configure_logging()
     name_application()
 
-    topologies = Application.get_env(:libcluster, :topologies) || []
+    topologies = Application.get_env(:libcluster, :topologies, [])
 
     children = [
       {Cluster.Supervisor, [topologies, [name: TpIasc.ClusterSupervisor]]},
@@ -82,7 +82,7 @@ defmodule TpIasc do
   end
 
   defp configure_logging() do
-    log_level = Application.get_env(:tp_iasc, :log_level)
+    log_level = Application.get_env(:tp_iasc, :log_level, :info)
     Logger.configure(level: log_level)
     Logger.info("Starting TP with log level #{log_level}")
   end

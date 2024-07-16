@@ -6,7 +6,7 @@ defmodule BlockSupervisor do
   end
 
   def init(_init_arg) do
-    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count)
+    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count, 10)
 
     children =
       for i <- 0..dictionary_count do
