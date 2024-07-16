@@ -31,10 +31,18 @@ defmodule Block.Listener do
     {:reply, value, node_id}
   end
 
-  def handle_call(:keys, _from, node_id) do
-    agent_name = Block.Dictionary.via_tuple({:block_dictionary, node_id})
-    Logger.debug("Getting keys from dictionary #{inspect(agent_name)}")
-    keys = Block.Dictionary.keys(agent_name)
+  def handle_call({:get_lesser, value}, _from, node_id) do
+    res = Block.Dictionary.lesser({:global, {:block_dictionary, node_id}}, value)
+    {:reply, res, node_id}
+  end
+
+  def handle_call({:get_greater, value}, _from, node_id) do
+    res = Block.Dictionary.greater({:global, {:block_dictionary, node_id}}, value)
+    {:reply, res, node_id}
+  end
+
+  def handle_call({:keys_distribution}, _from, node_id) do
+    keys = Block.Dictionary.keys({:global, {:block_dictionary, node_id}})
     {:reply, keys, node_id}
   end
 

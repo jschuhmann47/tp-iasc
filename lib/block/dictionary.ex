@@ -15,9 +15,31 @@ defmodule Block.Dictionary do
     Agent.get(agent, &Map.get(&1, key))
   end
 
+  def lesser(agent, value) do
+    Logger.debug("Dictionary(#{inspect(agent)}) getting values lesser than: #{inspect(value)}")
+    Agent.get(agent, &Map.values(:maps.filter(fn _, v -> v < value end, &1)))
+  end
+
+  def greater(agent, value) do
+    Logger.debug("Dictionary(#{inspect(agent)}) getting values greater than: #{inspect(value)}")
+    Agent.get(agent, &Map.values(:maps.filter(fn _, v -> v > value end, &1)))
+  end
+
   def update(agent, key, value) do
-    Logger.debug("Dictionary(#{inspect(agent)}) updating key: #{inspect(key)} with value: #{inspect(value)}")
-    Agent.update(agent, &Map.put(&1, key, value))
+    len = Agent.get(agent, &Map.keys(&1)) |> length
+    max_length = Application.get_env(:tp_iasc, :max_node_capacity, 3)
+
+    if len >= max_length do
+      Logger.warning(
+        "Dictionary(#{inspect(agent)}) at max capacity, not inserting new key/value #{inspect(key)}/#{inspect(value)}"
+      )
+    else
+      Logger.debug(
+        "Dictionary(#{inspect(agent)}) updating key: #{inspect(key)} with value: #{inspect(value)}"
+      )
+
+      Agent.update(agent, &Map.put(&1, key, value))
+    end
   end
 
   def delete(agent, key) do

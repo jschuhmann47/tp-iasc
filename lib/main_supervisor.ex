@@ -19,7 +19,8 @@ defmodule MainSupervisor do
   def init_child_processes do
     start_child(%{
       id: @dictionary_registry,
-      start: {Horde.Registry, :start_link, [keys: :unique, name: @dictionary_registry, members: :auto]},
+      start:
+        {Horde.Registry, :start_link, [keys: :unique, name: @dictionary_registry, members: :auto]},
       restart: :permanent
     })
 
@@ -35,12 +36,10 @@ defmodule MainSupervisor do
       restart: :transient
     })
 
-    port = unique_port()
-    Logger.info("Port: #{port}")
-    start_child({Plug.Cowboy, scheme: :http, plug: Clients.ClientHandler, options: [port: port]})
-  end
-
-  defp unique_port do
-    :rand.uniform(1000) + 8000
+    start_child(%{
+      id: Clients.Supervisor,
+      start: {Clients.Supervisor, :start_link, [[]]},
+      restart: :transient
+    })
   end
 end
