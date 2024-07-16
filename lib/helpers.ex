@@ -6,16 +6,27 @@ defmodule TpIasc.Helpers do
   end
 
   def list_orchestrators do
-    Horde.Registry.select(TpIasc.Registry, [{{:"$1", :_, :_}, [], [:"$1"]}]) |> Enum.filter(fn x -> contains_orchestrator?(x) end)
+    Horde.Registry.select(TpIasc.Registry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    |> Enum.filter(fn x -> contains_orchestrator?(x) end)
+  end
+
+  # should be only one
+  def get_master do
+    Enum.find(list_orchestrators(), fn orchestrator ->
+      GenServer.call(Orchestrators.Orchestrator.via_tuple(orchestrator), :is_master)
+    end)
   end
 
   defp contains_orchestrator?(value) do
     case value do
-      _ when is_integer(value) -> false  # Skip integers (or other non-string types)
+      # Skip integers (or other non-string types)
+      _ when is_integer(value) ->
+        false
+
       _ ->
         str = to_string(value)
         String.contains?(str, "Orchestrator")
-      end
+    end
   end
 
   def log_orchestrator_pids do

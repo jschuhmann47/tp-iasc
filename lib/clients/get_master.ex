@@ -17,11 +17,7 @@ defmodule Clients.GetMaster do
         &Map.get_and_update(&1, :master, fn x ->
           case x do
             nil ->
-              {:master,
-               Enum.find(Helpers.list_orchestrators, fn orchestrator ->
-                 GenServer.call(Orchestrators.Orchestrator.via_tuple(orchestrator), :is_master)
-               end)}
-
+              {:master, Helpers.get_master()}
             x ->
               x
           end
