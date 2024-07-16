@@ -1,4 +1,5 @@
 defmodule OrchestratorSupervisor do
+  alias TpIasc.Helpers
   use Horde.DynamicSupervisor
   require Logger
 
@@ -25,6 +26,9 @@ defmodule OrchestratorSupervisor do
     case Horde.DynamicSupervisor.start_child(__MODULE__, child_spec) do
       {:ok, pid} ->
         Logger.info("Started orchestrator #{name} with pid #{inspect(pid)}")
+        if check_if_no_master() do
+          GenServer.cast(pid, {:set_master, name}) # Sets itself as master if no masters are available
+        end
         case Horde.Registry.register(TpIasc.Registry, name, pid) do
           {:ok, registered_pid} ->
             Logger.info("Registered orchestrator #{name} with pid #{inspect(registered_pid)}")
@@ -46,5 +50,9 @@ defmodule OrchestratorSupervisor do
         Logger.error("Failed to start orchestrator #{name}: #{inspect(reason)}")
         {:error, reason}
     end
+  end
+
+  def check_if_no_master do
+    nil == Helpers.get_master()
   end
 end
