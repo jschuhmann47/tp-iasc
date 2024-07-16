@@ -1,4 +1,5 @@
 defmodule OrchestratorSupervisor do
+  alias TpIasc.Helpers
   use Horde.DynamicSupervisor
   require Logger
 
@@ -25,6 +26,7 @@ defmodule OrchestratorSupervisor do
     case Horde.DynamicSupervisor.start_child(__MODULE__, child_spec) do
       {:ok, pid} ->
         Logger.info("Started orchestrator #{name} with pid #{inspect(pid)}")
+        GenServer.cast(pid, {:set_master, name}) # Temporal
         case Horde.Registry.register(TpIasc.Registry, name, pid) do
           {:ok, registered_pid} ->
             Logger.info("Registered orchestrator #{name} with pid #{inspect(registered_pid)}")

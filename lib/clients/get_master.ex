@@ -1,8 +1,7 @@
 defmodule Clients.GetMaster do
+  alias TpIasc.Helpers
   use Agent
   require Logger
-
-  @orchestrators [Orchestrator1, Orchestrator2, Orchestrator3, Orchestrator4, Orchestrator5]
 
   def start_link() do
     Logger.info("GetMaster started")
@@ -19,8 +18,8 @@ defmodule Clients.GetMaster do
           case x do
             nil ->
               {:master,
-               Enum.find(@orchestrators, fn orchestrator ->
-                 GenServer.call(orchestrator, :is_master)
+               Enum.find(Helpers.list_orchestrators, fn orchestrator ->
+                 GenServer.call(Orchestrators.Orchestrator.via_tuple(orchestrator), :is_master)
                end)}
 
             x ->

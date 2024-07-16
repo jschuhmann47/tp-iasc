@@ -41,8 +41,4 @@ defmodule MainSupervisor do
       restart: :transient
     })
   end
-
-  defp unique_port do
-    :rand.uniform(1000) + 8000
-  end
 end

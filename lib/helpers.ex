@@ -1,11 +1,21 @@
 defmodule TpIasc.Helpers do
   require Logger
+
   def list_registry_members do
     Horde.Cluster.members(TpIasc.Registry)
   end
 
   def list_orchestrators do
-    Horde.Registry.select(TpIasc.Registry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Horde.Registry.select(TpIasc.Registry, [{{:"$1", :_, :_}, [], [:"$1"]}]) |> Enum.filter(fn x -> contains_orchestrator?(x) end)
+  end
+
+  defp contains_orchestrator?(value) do
+    case value do
+      _ when is_integer(value) -> false  # Skip integers (or other non-string types)
+      _ ->
+        str = to_string(value)
+        String.contains?(str, "Orchestrator")
+      end
   end
 
   def log_orchestrator_pids do
@@ -25,5 +35,6 @@ defmodule TpIasc.Helpers do
     log_orchestrator_pids()
     log_registry_members()
   end
-
 end
+
+# TpIasc.Helpers.list_orchestrators()

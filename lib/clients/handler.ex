@@ -72,7 +72,7 @@ defmodule Clients.ClientHandler do
   end
 
   def get_master() do
-    Clients.GetMaster.get_master()
+    Orchestrators.Orchestrator.via_tuple(Clients.GetMaster.get_master())
   end
 
   def check_length(key) do
