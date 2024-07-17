@@ -25,7 +25,7 @@ defmodule Block.Listener do
   defp via_tuple(node_id), do: {:via, Horde.Registry, {@block_listener_registry, node_id}}
 
   def handle_call({:get, key}, _from, node_id) do
-    agent_name = Block.Dictionary.via_tuple({:dictionary, node_id, 0})
+    agent_name = Block.Dictionary.via_tuple({:block_dictionary, node_id, 0})
     Logger.debug("Getting key #{inspect(key)} from dictionary #{inspect(agent_name)}")
     value = Block.Dictionary.value(agent_name, key)
     {:reply, value, node_id}

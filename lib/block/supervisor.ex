@@ -4,7 +4,10 @@ defmodule Block.DictionarySupervisor do
 
   def start_link(init_arg) do
     Horde.DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
-    Enum.map(start_dictionaries(), fn x -> Horde.DynamicSupervisor.start_child(__MODULE__, x) end)
+  end
+
+  def start_child(child_spec) do
+    Horde.DynamicSupervisor.start_child(__MODULE__, child_spec)
   end
 
   def init(_init_arg) do
@@ -18,24 +21,22 @@ defmodule Block.DictionarySupervisor do
   def start_dictionaries do
     dictionary_count = Application.get_env(:tp_iasc, :dictionary_count, 10)
     replication_factor = Application.get_env(:tp_iasc, :replication_factor, 3)
-    children = []
+    # children = []
 
-    for i <- 0..dictionary_count do
-      for j <- 1..replication_factor do
-        Logger.debug("Starting dictionary #{i} replica #{j}")
+    children =
+      for i <- 0..dictionary_count do
+        for j <- 1..replication_factor do
+          Logger.debug("Starting dictionary #{i} replica #{j}")
 
-        children = [
-          children
-          | %{
-              id: {:dictionary, i, j},
-              start: {Block.Dictionary, :start_link, [{:global, {:block_dictionary, i, j}}]},
-              restart: :transient
-            }
-        ]
+          %{
+            id: {:block_dictionary, i, j},
+            start: {Block.Dictionary, :start_link, [:block_dictionary, i, j]},
+            restart: :transient
+          }
+        end
       end
-    end
 
-    children
+    List.flatten(children)
   end
 
   def adjust_all_replications do
@@ -84,7 +85,7 @@ defmodule Block.DictionarySupervisor do
 
     for i <- 1..deficit do
       case Horde.DynamicSupervisor.start_child(__MODULE__, %{
-             id: {:dictionary, dictionary_id, i},
+             id: {:block_dictionary, dictionary_id, i},
              start:
                {Block.Dictionary, :start_link, [{:global, {:block_dictionary, dictionary_id, i}}]},
              restart: :transient

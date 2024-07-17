@@ -23,6 +23,7 @@ defmodule TpIasc.Helpers do
       _ when is_integer(value) ->
         false
 
+      {:block_dictionary, _, _} -> false
       _ ->
         str = to_string(value)
         String.contains?(str, "Orchestrator")
