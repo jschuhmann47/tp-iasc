@@ -30,7 +30,7 @@ defmodule TpIasc.Helpers do
   end
 
   def list_dictionaries do
-    Horde.Registry.select(TpIasc.Registry, [{{{:block_dictionary, :"$1"}, :_, :_}, [], [:"$1"]}])
+    Horde.Registry.select(TpIasc.Registry, [{{{:block_dictionary, :"$1", :"$2"}, :_, :_}, [], [:"$1", :"$2"]}])
   end
 
   def log_orchestrator_pids do

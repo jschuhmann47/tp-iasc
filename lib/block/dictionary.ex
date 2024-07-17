@@ -4,8 +4,8 @@ defmodule Block.Dictionary do
 
   @block_dictionary_registry TpIasc.Registry
 
-  def start_link({id, replica}) do
-    name = via_tuple({:block_dictionary, id, replica})
+  def start_link({name, id, replica}) do
+    name = via_tuple({name, id, replica})
     Logger.info("Dictionary started with name: #{inspect(name)}")
     Agent.start_link(fn -> %{} end, name: name)
   end
@@ -55,6 +55,6 @@ defmodule Block.Dictionary do
     Agent.get(agent, &Map.values(&1))
   end
 
-  def via_tuple({:block_dictionary, id, replica}), do: {:via, Horde.Registry, {@block_dictionary_registry, {:block_dictionary, id, replica}}}
-  def via_tuple({:block_dictionary, id}), do: {:via, Horde.Registry, {@block_dictionary_registry, {:block_dictionary, id}}}
+  def via_tuple({:dictionary, id, replica}), do: {:via, Horde.Registry, {@block_dictionary_registry, {:dictionary, id, replica}}}
+  def via_tuple({:dictionary, id}), do: {:via, Horde.Registry, {@block_dictionary_registry, {:dictionary, id}}}
 end

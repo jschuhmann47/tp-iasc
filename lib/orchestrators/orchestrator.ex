@@ -124,7 +124,7 @@ defmodule Orchestrators.Orchestrator do
 
   def handle_info(:ping_master, state) do
     %{master_name: master_name} = state
-    Logger.debug("state: #{inspect(state)}")
+    # Logger.debug("state: #{inspect(state)}")
     if !am_i_master?(state) do
       res = GenServer.call(via_tuple(master_name), :is_master)
 
