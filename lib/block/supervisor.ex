@@ -19,24 +19,30 @@ defmodule Block.DictionarySupervisor do
   end
 
   def start_dictionaries do
-    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count, 10)
-    replication_factor = Application.get_env(:tp_iasc, :replication_factor, 3)
-    # children = []
+    if TpIasc.Helpers.list_dictionaries() == [] do
+      dictionary_count = Application.get_env(:tp_iasc, :dictionary_count, 10)
+      replication_factor = Application.get_env(:tp_iasc, :replication_factor, 3)
+      # children = []
 
-    children =
-      for i <- 0..dictionary_count do
-        for j <- 1..replication_factor do
-          Logger.debug("Starting dictionary #{i} replica #{j}")
+      children =
+        for i <- 0..dictionary_count do
+          for j <- 1..replication_factor do
+            Logger.debug("Starting dictionary #{i} replica #{j}")
 
-          %{
-            id: {:block_dictionary, i, j},
-            start: {Block.Dictionary, :start_link, [:block_dictionary, i, j]},
-            restart: :transient
-          }
+            %{
+              id: {:block_dictionary, i, j},
+              start: {Block.Dictionary, :start_link, [:block_dictionary, i, j]},
+              restart: :transient
+            }
+          end
         end
-      end
 
-    List.flatten(children)
+      List.flatten(children)
+    else
+      # don't create the dictionaries if one node has already created them
+      []
+    end
+
   end
 
   def adjust_all_replications do
