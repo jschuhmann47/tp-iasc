@@ -119,7 +119,7 @@ defmodule Orchestrators.Orchestrator do
   end
 
   def get_node_from_number(node_number) do
-    Horde.Registry.lookup(@dictionary_registry, node_number)
+    Horde.Registry.lookup(@dictionary_registry, {:block_listener, node_number})
   end
 
   def handle_info(:ping_master, state) do
