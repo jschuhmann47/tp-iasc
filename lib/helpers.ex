@@ -19,7 +19,6 @@ defmodule TpIasc.Helpers do
 
   defp contains_orchestrator?(value) do
     case value do
-      # Skip integers (or other non-string types)
       _ when is_integer(value) ->
         false
 
@@ -31,7 +30,15 @@ defmodule TpIasc.Helpers do
   end
 
   def list_dictionaries do
-    Horde.Registry.select(TpIasc.Registry, [{{{:block_dictionary, :"$1", :"$2"}, :_, :_}, [], [:"$1", :"$2"]}])
+    Horde.Registry.select(TpIasc.Registry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    |> Enum.filter(fn x -> is_dictionary?(x) end)
+  end
+
+  defp is_dictionary?(value) do
+    case value do
+      {:block_dictionary, _, _} -> true
+      _ -> false
+    end
   end
 
   def log_orchestrator_pids do
