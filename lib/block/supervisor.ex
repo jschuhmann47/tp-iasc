@@ -42,7 +42,6 @@ defmodule Block.DictionarySupervisor do
       # don't create the dictionaries if one node has already created them
       []
     end
-
   end
 
   def adjust_all_replications do

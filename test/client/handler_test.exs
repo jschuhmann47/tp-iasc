@@ -24,7 +24,8 @@ defmodule TpIascRouterTest do
       |> ClientHandler.call(@opts)
 
     assert conn.state == :sent
-    assert conn.status == 404 # TODO test with data
+    # TODO test with data
+    assert conn.status == 404
   end
 
   test "updates a value" do

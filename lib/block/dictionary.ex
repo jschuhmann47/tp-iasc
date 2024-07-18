@@ -55,5 +55,5 @@ defmodule Block.Dictionary do
     Agent.get(agent, &Map.values(&1))
   end
 
-  def via_tuple(name), do: {:via, Horde.Registry, {@block_dictionary_registry,name}}
+  def via_tuple(name), do: {:via, Horde.Registry, {@block_dictionary_registry, name}}
 end

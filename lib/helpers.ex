@@ -9,6 +9,7 @@ defmodule TpIasc.Helpers do
     Horde.Registry.select(TpIasc.Registry, [{{:"$1", :_, :_}, [], [:"$1"]}])
     |> Enum.filter(fn x -> contains_orchestrator?(x) end)
   end
+
   # Horde.Registry.select(TpIasc.Registry, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}]) |> Enum.sort()
 
   # should be only one
@@ -23,8 +24,12 @@ defmodule TpIasc.Helpers do
       _ when is_integer(value) ->
         false
 
-      {:block_dictionary, _, _} -> false
-      {:block_listener, _,} -> false
+      {:block_dictionary, _, _} ->
+        false
+
+      {:block_listener, _} ->
+        false
+
       _ ->
         str = to_string(value)
         String.contains?(str, "Orchestrator")
@@ -32,7 +37,10 @@ defmodule TpIasc.Helpers do
   end
 
   def see_all_registered do
-    Horde.Registry.select(TpIasc.Registry, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}]) |> Enum.sort()
+    Horde.Registry.select(TpIasc.Registry, [
+      {{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}
+    ])
+    |> Enum.sort()
   end
 
   def list_dictionaries do

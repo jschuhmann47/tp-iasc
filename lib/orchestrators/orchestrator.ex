@@ -16,6 +16,7 @@ defmodule Orchestrators.Orchestrator do
     # this is so it's unlikely for two orchestrators to initiate selection at the same time
     interval = 4000 + :rand.uniform(2000)
     :timer.send_interval(interval, :ping_master)
+
     {:ok,
      %{
        dictionary_count: dictionary_count,

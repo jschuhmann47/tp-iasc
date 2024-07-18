@@ -31,7 +31,7 @@ defmodule OrchestratorSupervisor do
           # Sets itself as master if no masters are available
           GenServer.cast(pid, {:set_master, name})
         else
-          GenServer.cast(pid, {:set_master, Helpers.get_master})
+          GenServer.cast(pid, {:set_master, Helpers.get_master()})
         end
 
         case Horde.Registry.register(TpIasc.Registry, name, pid) do

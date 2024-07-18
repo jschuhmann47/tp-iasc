@@ -18,6 +18,7 @@ defmodule Clients.GetMaster do
           case x do
             nil ->
               {:master, Helpers.get_master()}
+
             x ->
               x
           end

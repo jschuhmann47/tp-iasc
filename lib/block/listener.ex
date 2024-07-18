@@ -22,10 +22,12 @@ defmodule Block.Listener do
     }
   end
 
-  defp via_tuple(node_id), do: {:via, Horde.Registry, {@block_listener_registry, {:block_listener, node_id}}}
+  defp via_tuple(node_id),
+    do: {:via, Horde.Registry, {@block_listener_registry, {:block_listener, node_id}}}
 
   def handle_call({:get, key}, _from, node_id) do
-    agent_name = Block.Dictionary.via_tuple({:block_dictionary, node_id, 1}) # TODO: send replica number, now it's hardcoded in 1
+    # TODO: send replica number, now it's hardcoded in 1
+    agent_name = Block.Dictionary.via_tuple({:block_dictionary, node_id, 1})
     Logger.debug("Getting key #{inspect(key)} from dictionary #{inspect(agent_name)}")
     value = Block.Dictionary.value(agent_name, key)
     {:reply, value, node_id}
@@ -55,7 +57,11 @@ defmodule Block.Listener do
     1..3
     |> Enum.each(fn replica ->
       agent_name = Block.Dictionary.via_tuple({:block_dictionary, node_id, replica})
-      Logger.debug("Sending key #{inspect(key)} with value #{inspect(value)} to replica #{inspect(agent_name)}")
+
+      Logger.debug(
+        "Sending key #{inspect(key)} with value #{inspect(value)} to replica #{inspect(agent_name)}"
+      )
+
       Block.Dictionary.update(agent_name, key, value)
     end)
   end

@@ -5,15 +5,16 @@ config :tp_iasc,
   replication_factor: 3,
   max_node_capacity: 3,
   log_level: :debug,
-  http_port: 8051 # Configuración fija del puerto HTTP
+  # Configuración fija del puerto HTTP
+  http_port: 8051
 
-  config :libcluster,
+config :libcluster,
   topologies: [
     example: [
       strategy: Cluster.Strategy.Gossip,
       config: [
         port: 45892,
-        multicast_addr: "255.255.255.255",
+        multicast_addr: "255.255.255.255"
       ]
     ]
   ]
