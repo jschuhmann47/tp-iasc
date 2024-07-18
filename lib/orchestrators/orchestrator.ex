@@ -10,10 +10,6 @@ defmodule Orchestrators.Orchestrator do
     GenServer.start_link(__MODULE__, {dictionary_count, name}, name: via_tuple(name))
   end
 
-  def get_orchestrator(name) do
-    Horde.Registry.lookup(@dictionary_registry, name)
-  end
-
   def via_tuple(name), do: {:via, Horde.Registry, {@dictionary_registry, name}}
 
   def init({dictionary_count, name}) do
@@ -123,12 +119,12 @@ defmodule Orchestrators.Orchestrator do
   end
 
   def get_node_from_number(node_number) do
-    Horde.Registry.lookup(@dictionary_registry, node_number)
+    Horde.Registry.lookup(@dictionary_registry, {:block_listener, node_number})
   end
 
   def handle_info(:ping_master, state) do
     %{master_name: master_name} = state
-    Logger.debug("state: #{inspect(state)}")
+    # Logger.debug("state: #{inspect(state)}")
     if !am_i_master?(state) do
       res = GenServer.call(via_tuple(master_name), :is_master)
 

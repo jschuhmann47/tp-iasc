@@ -36,6 +36,8 @@ defmodule MainSupervisor do
       restart: :transient
     })
 
+    Block.DictionarySupervisor.start_dictionaries |> Enum.map(fn x -> Block.DictionarySupervisor.start_child(x) end)
+
     start_child(%{
       id: Clients.Supervisor,
       start: {Clients.Supervisor, :start_link, [[]]},

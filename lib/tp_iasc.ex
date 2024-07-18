@@ -27,6 +27,7 @@ defmodule TpIasc do
     |> case do
       {:ok, pid} ->
         start_supervised_processes()
+        monitor_cluster_membership()
         start_orchestrator()
         {:ok, pid}
 
@@ -77,6 +78,10 @@ defmodule TpIasc do
     end
   end
 
+  defp monitor_cluster_membership do
+    :net_kernel.monitor_nodes(true)
+  end
+
   def name_application() do
     Process.register(self(), TpIasc)
   end
@@ -85,5 +90,17 @@ defmodule TpIasc do
     log_level = Application.get_env(:tp_iasc, :log_level, :info)
     Logger.configure(level: log_level)
     Logger.info("Starting TP with log level #{log_level}")
+  end
+
+  def handle_info({:nodeup, _node}, state) do
+    Logger.info("Node joined the cluster")
+    Block.DictionarySupervisor.adjust_all_replications()
+    {:noreply, state}
+  end
+
+  def handle_info({:nodedown, _node}, state) do
+    Logger.info("Node left the cluster")
+    Block.DictionarySupervisor.adjust_all_replications()
+    {:noreply, state}
   end
 end
