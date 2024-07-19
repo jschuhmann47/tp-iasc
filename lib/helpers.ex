@@ -34,15 +34,9 @@ defmodule TpIasc.Helpers do
   end
 
   def list_dictionaries do
-    Horde.Registry.select(TpIasc.Registry, [{{:"$1", :_, :_}, [], [:"$1"]}])
-    |> Enum.filter(&is_dictionary?/1)
-  end
-
-  defp is_dictionary?(value) do
-    case value do
-      {:block_dictionary, _, _} -> true
-      _ -> false
-    end
+    Horde.Registry.select(TpIasc.Registry, [
+      {{{:block_dictionary, :"$1", :"$2"}, :_, :_}, [], [{{:block_dictionary, :"$1", :"$2"}}]}
+    ])
   end
 
   def list_local_listeners do
