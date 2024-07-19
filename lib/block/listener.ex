@@ -26,25 +26,58 @@ defmodule Block.Listener do
     do: {:via, Registry, {@listener_registry, {:block_listener, node_id}}}
 
   def handle_call({:get, key}, _from, node_id) do
-    # TODO: send replica number, now it's hardcoded in 1
-    agent_name = Block.Dictionary.via_tuple({:block_dictionary, node_id, 1})
-    Logger.debug("Getting key #{inspect(key)} from dictionary #{inspect(agent_name)}")
-    value = Block.Dictionary.value(agent_name, key)
+    value =
+      case get_first_replica_avaliable(node_id) do
+        nil ->
+          Logger.info("No replica found in node #{node_id}")
+          nil
+
+        agent_name ->
+          Logger.debug("Getting key #{inspect(key)} from dictionary #{inspect(agent_name)}")
+          Block.Dictionary.value(agent_name, key)
+      end
+
     {:reply, value, node_id}
   end
 
   def handle_call({:get_lesser, value}, _from, node_id) do
-    res = Block.Dictionary.lesser({:global, {:block_dictionary, node_id}}, value)
-    {:reply, res, node_id}
+    value =
+      case get_first_replica_avaliable(node_id) do
+        nil ->
+          Logger.info("No replica found in node #{node_id}")
+          nil
+
+        agent_name ->
+          Logger.debug(
+            "Getting lessers from value #{inspect(value)} from dictionary #{inspect(agent_name)}"
+          )
+
+          Block.Dictionary.lesser(agent_name, value)
+      end
+
+    {:reply, value, node_id}
   end
 
   def handle_call({:get_greater, value}, _from, node_id) do
-    res = Block.Dictionary.greater({:global, {:block_dictionary, node_id}}, value)
-    {:reply, res, node_id}
+    value =
+      case get_first_replica_avaliable(node_id) do
+        nil ->
+          Logger.info("No replica found in node #{node_id}")
+          nil
+
+        agent_name ->
+          Logger.debug(
+            "Getting greaters from value #{inspect(value)} from dictionary #{inspect(agent_name)}"
+          )
+
+          Block.Dictionary.greater(agent_name, value)
+      end
+
+    {:reply, value, node_id}
   end
 
   def handle_call({:keys_distribution}, _from, node_id) do
-    keys = Block.Dictionary.keys({:global, {:block_dictionary, node_id}})
+    keys = Block.Dictionary.keys(get_name_from_node_and_replica(node_id, 1))
     {:reply, keys, node_id}
   end
 
@@ -54,15 +87,33 @@ defmodule Block.Listener do
   end
 
   defp send_to_all_replicas(node_id, key, value) do
-    1..3
+    max = Application.get_env(:tp_iasc, :replication_factor, 3)
+
+    1..max
     |> Enum.each(fn replica ->
-      agent_name = Block.Dictionary.via_tuple({:block_dictionary, node_id, replica})
+      agent_name = get_name_from_node_and_replica(node_id, replica)
 
       Logger.debug(
         "Sending key #{inspect(key)} with value #{inspect(value)} to replica #{inspect(agent_name)}"
       )
 
       Block.Dictionary.update(agent_name, key, value)
+    end)
+  end
+
+  def get_name_from_node_and_replica(node, replica) do
+    Block.Dictionary.via_tuple({:block_dictionary, node, replica})
+  end
+
+  def get_names_for_all_replicas(node_id) do
+    max = Application.get_env(:tp_iasc, :replication_factor, 3)
+    1..max |> Enum.map(fn n -> get_name_from_node_and_replica(node_id, n) end)
+  end
+
+  def get_first_replica_avaliable(node_id) do
+    get_names_for_all_replicas(node_id)
+    |> Enum.find(nil, fn agent ->
+      Registry.lookup(@listener_registry, agent)
     end)
   end
 end
