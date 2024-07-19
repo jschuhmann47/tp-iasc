@@ -51,7 +51,9 @@ defmodule TpIasc.Helpers do
           [] -> :undefined
         end
 
-      Logger.info("Orchestrator #{inspect(orchestrator)} has pid #{inspect(orchestrator_pid)} on node #{node_of_pid(orchestrator_pid)}")
+      Logger.info(
+        "Orchestrator #{inspect(orchestrator)} has pid #{inspect(orchestrator_pid)} on node #{node_of_pid(orchestrator_pid)}"
+      )
     end
   end
 
@@ -63,17 +65,22 @@ defmodule TpIasc.Helpers do
           [] -> :undefined
         end
 
-      Logger.info("Dictionary #{inspect(dictionary)} has pid #{inspect(dictionary_pid)} on node #{node_of_pid(dictionary_pid)}")
+      Logger.info(
+        "Dictionary #{inspect(dictionary)} has pid #{inspect(dictionary_pid)} on node #{node_of_pid(dictionary_pid)}"
+      )
     end
   end
 
   def log_local_listeners do
     for listener <- list_local_listeners() do
-      listener_pid = Registry.lookup(Block.ListenerRegistry, listener)
-      |> Enum.map(fn {pid, _} -> pid end)
-      |> List.first()
+      listener_pid =
+        Registry.lookup(Block.ListenerRegistry, listener)
+        |> Enum.map(fn {pid, _} -> pid end)
+        |> List.first()
 
-      Logger.info("Local listener #{inspect(listener)} has pid #{inspect(listener_pid)} on node #{node_of_pid(listener_pid)}")
+      Logger.info(
+        "Local listener #{inspect(listener)} has pid #{inspect(listener_pid)} on node #{node_of_pid(listener_pid)}"
+      )
     end
   end
 
