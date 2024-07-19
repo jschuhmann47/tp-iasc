@@ -7,12 +7,9 @@ defmodule TpIasc.Helpers do
 
   def list_orchestrators do
     Horde.Registry.select(TpIasc.Registry, [{{:"$1", :_, :_}, [], [:"$1"]}])
-    |> Enum.filter(fn x -> contains_orchestrator?(x) end)
+    |> Enum.filter(&contains_orchestrator?/1)
   end
 
-  # Horde.Registry.select(TpIasc.Registry, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}]) |> Enum.sort()
-
-  # should be only one
   def get_master do
     Enum.find(list_orchestrators(), fn orchestrator ->
       GenServer.call(Orchestrators.Orchestrator.via_tuple(orchestrator), :is_master)
@@ -22,18 +19,10 @@ defmodule TpIasc.Helpers do
   # TODO this can be improved... if we have time...
   defp contains_orchestrator?(value) do
     case value do
-      _ when is_integer(value) ->
-        false
-
-      {:block_dictionary, _, _} ->
-        false
-
-      {:block_listener, _} ->
-        false
-
-      _ ->
-        str = to_string(value)
-        String.contains?(str, "Orchestrator")
+      _ when is_integer(value) -> false
+      {:block_dictionary, _, _} -> false
+      {:block_listener, _} -> false
+      _ -> String.contains?(to_string(value), "Orchestrator")
     end
   end
 
@@ -45,9 +34,19 @@ defmodule TpIasc.Helpers do
   end
 
   def list_dictionaries do
-    Horde.Registry.select(TpIasc.Registry, [
-      {{{:block_dictionary, :"$1", :"$2"}, :_, :_}, [], [{{:block_dictionary, :"$1", :"$2"}}]}
-    ])
+    Horde.Registry.select(TpIasc.Registry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    |> Enum.filter(&is_dictionary?/1)
+  end
+
+  defp is_dictionary?(value) do
+    case value do
+      {:block_dictionary, _, _} -> true
+      _ -> false
+    end
+  end
+
+  def list_local_listeners do
+    Registry.select(Block.ListenerRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   def log_orchestrator_pids do
@@ -58,19 +57,29 @@ defmodule TpIasc.Helpers do
           [] -> :undefined
         end
 
-      Logger.info("Orchestrator #{orchestrator} has pid #{inspect(orchestrator_pid)}")
+      Logger.info("Orchestrator #{inspect(orchestrator)} has pid #{inspect(orchestrator_pid)} on node #{node_of_pid(orchestrator_pid)}")
     end
   end
 
   def log_dictionary_pids do
-    for dictionary_id <- list_dictionaries() do
+    for dictionary <- list_dictionaries() do
       dictionary_pid =
-        case Horde.Registry.lookup(TpIasc.Registry, dictionary_id) do
+        case Horde.Registry.lookup(TpIasc.Registry, dictionary) do
           [{pid, _}] -> pid
           [] -> :undefined
         end
 
-      Logger.info("Dictionary #{dictionary_id} has pid #{inspect(dictionary_pid)}")
+      Logger.info("Dictionary #{inspect(dictionary)} has pid #{inspect(dictionary_pid)} on node #{node_of_pid(dictionary_pid)}")
+    end
+  end
+
+  def log_local_listeners do
+    for listener <- list_local_listeners() do
+      listener_pid = Registry.lookup(Block.ListenerRegistry, listener)
+      |> Enum.map(fn {pid, _} -> pid end)
+      |> List.first()
+
+      Logger.info("Local listener #{inspect(listener)} has pid #{inspect(listener_pid)} on node #{node_of_pid(listener_pid)}")
     end
   end
 
@@ -80,47 +89,17 @@ defmodule TpIasc.Helpers do
     end
   end
 
-  # TpIasc.Helpers.log_replication_status()
-  def log_replication_status do
-    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count)
-    replication_factor = Application.get_env(:tp_iasc, :replication_factor)
-
-    for i <- 0..(dictionary_count - 1) do
-      replicas =
-        Enum.filter(:global.registered_names(), fn name ->
-          case name do
-            {:block_dictionary, ^i, _} -> true
-            _ -> false
-          end
-        end)
-
-      Logger.info(
-        "Dictionary #{i} tiene #{length(replicas)} replicas. Deseadas: #{replication_factor}"
-      )
-
-      for replica <- replicas do
-        case :global.whereis_name(replica) do
-          pid when is_pid(pid) ->
-            node = :erlang.node(pid)
-            Logger.info("Replica #{inspect(replica)} se encuentra en el nodo #{node}")
-
-          :undefined ->
-            Logger.warning("Replica #{inspect(replica)} no está activa")
-        end
-      end
-    end
-  end
-
+  # TpIasc.Helpers.log_all()
   def log_all do
     log_orchestrator_pids()
     log_dictionary_pids()
-    log_registry_members()
-    log_replication_status()
+    log_local_listeners()
   end
 
   def list_global_names do
     :global.registered_names()
   end
-end
 
-# TpIasc.Helpers.list_orchestrators()
+  defp node_of_pid(pid) when is_pid(pid), do: :erlang.node(pid)
+  defp node_of_pid(_), do: :undefined
+end
