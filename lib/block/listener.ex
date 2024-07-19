@@ -113,7 +113,7 @@ defmodule Block.Listener do
   def get_first_replica_avaliable(node_id) do
     get_names_for_all_replicas(node_id)
     |> Enum.find(nil, fn agent ->
-      Horde.Registry.lookup(@block_listener_registry, agent)
+      Registry.lookup(@listener_registry, agent)
     end)
   end
 end
