@@ -26,7 +26,7 @@ defmodule Block.Listener do
     do: {:via, Horde.Registry, {@block_listener_registry, {:block_listener, node_id}}}
 
   def handle_call({:get, key}, _from, node_id) do
-    # TODO: send replica number, now it's hardcoded in 1
+    # First replica is chosen, if it's not alive, go to the next one till there is no more
     agent_name = get_name_from_node_and_replica(node_id, 1)
     Logger.debug("Getting key #{inspect(key)} from dictionary #{inspect(agent_name)}")
     value = Block.Dictionary.value(agent_name, key)
