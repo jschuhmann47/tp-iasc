@@ -4,10 +4,10 @@ defmodule Block.Dictionary do
 
   @block_dictionary_registry TpIasc.Registry
 
-  def start_link(name, id, replica) do
-    name = via_tuple({name, id, replica})
-    Logger.info("Dictionary started with name: #{inspect(name)}")
-    Agent.start_link(fn -> %{} end, name: name)
+  def start_link({name, id, replica}) do
+    via_name = via_tuple({name, id, replica})
+    Logger.info("Dictionary started with name: #{inspect(via_name)}")
+    Agent.start_link(fn -> %{} end, name: via_name)
   end
 
   def value(agent, key) do

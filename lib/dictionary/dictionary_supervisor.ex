@@ -13,8 +13,9 @@ defmodule Block.DictionarySupervisor do
   def init(_init_arg) do
     Horde.DynamicSupervisor.init(
       strategy: :one_for_one,
-      members: :auto,
-      process_redistribution: :active
+      distribution_strategy: Horde.UniformQuorumDistribution,
+      process_redistribution: :active,
+      members: :auto
     )
   end
 
@@ -22,25 +23,22 @@ defmodule Block.DictionarySupervisor do
     if TpIasc.Helpers.list_dictionaries() == [] do
       dictionary_count = Application.get_env(:tp_iasc, :dictionary_count, 10)
       replication_factor = Application.get_env(:tp_iasc, :replication_factor, 3)
-      # children = []
 
       children =
-        for i <- 0..dictionary_count do
+        for i <- 0..(dictionary_count - 1) do
           for j <- 1..replication_factor do
             Logger.debug("Starting dictionary #{i} replica #{j}")
 
             %{
               id: {:block_dictionary, i, j},
-              start: {Block.Dictionary, :start_link, [:block_dictionary, i, j]},
+              start: {Block.Dictionary, :start_link, [{:block_dictionary, i, j}]},
               restart: :transient
             }
           end
         end
 
       List.flatten(children)
-    else
-      # don't create the dictionaries if one node has already created them
-      []
+      |> Enum.each(&start_child/1)
     end
   end
 
@@ -74,7 +72,7 @@ defmodule Block.DictionarySupervisor do
           "El dictionary #{i} tiene menos replicas de las deseadas. Actual: #{length(replicas)}, Deseadas: #{replication_factor}"
         )
 
-        adjust_replication(i, replication_factor - length(replicas))
+        adjust_replication(i, replication_factor, replicas)
       else
         Logger.info(
           "El dictionary #{i} tiene el número correcto de réplicas. Actual: #{length(replicas)}, Deseadas: #{replication_factor}"
@@ -83,16 +81,20 @@ defmodule Block.DictionarySupervisor do
     end
   end
 
-  defp adjust_replication(dictionary_id, deficit) when deficit > 0 do
+  defp adjust_replication(dictionary_id, replication_factor, existing_replicas) do
+    existing_replica_ids = Enum.map(existing_replicas, fn {:block_dictionary, ^dictionary_id, replica_id} -> replica_id end)
+    desired_replica_ids = Enum.to_list(1..replication_factor)
+
+    missing_replica_ids = Enum.filter(desired_replica_ids, fn id -> id not in existing_replica_ids end)
+
     Logger.info(
-      "Ajustando la replicación para dictionary #{dictionary_id}. Faltan #{deficit} réplicas."
+      "Ajustando la replicación para dictionary #{dictionary_id}. Faltan #{length(missing_replica_ids)} réplicas."
     )
 
-    for i <- 1..deficit do
+    for replica_id <- missing_replica_ids do
       case Horde.DynamicSupervisor.start_child(__MODULE__, %{
-             id: {:block_dictionary, dictionary_id, i},
-             start:
-               {Block.Dictionary, :start_link, [{:global, {:block_dictionary, dictionary_id, i}}]},
+             id: {:block_dictionary, dictionary_id, replica_id},
+             start: {Block.Dictionary, :start_link, [{:block_dictionary, dictionary_id, replica_id}]},
              restart: :transient
            }) do
         {:ok, pid} ->

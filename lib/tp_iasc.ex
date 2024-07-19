@@ -23,8 +23,7 @@ defmodule TpIasc do
 
     opts = [strategy: :one_for_one, name: TpIasc.Supervisor]
 
-    Supervisor.start_link(children, opts)
-    |> case do
+    case Supervisor.start_link(children, opts) do
       {:ok, pid} ->
         start_supervised_processes()
         monitor_cluster_membership()
@@ -82,7 +81,7 @@ defmodule TpIasc do
     :net_kernel.monitor_nodes(true)
   end
 
-  def name_application() do
+  defp name_application() do
     Process.register(self(), TpIasc)
   end
 
@@ -94,12 +93,14 @@ defmodule TpIasc do
 
   def handle_info({:nodeup, _node}, state) do
     Logger.info("Node joined the cluster")
+    :timer.sleep(2000)
     Block.DictionarySupervisor.adjust_all_replications()
     {:noreply, state}
   end
 
   def handle_info({:nodedown, _node}, state) do
     Logger.info("Node left the cluster")
+    :timer.sleep(2000)
     Block.DictionarySupervisor.adjust_all_replications()
     {:noreply, state}
   end
