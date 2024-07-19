@@ -2,7 +2,7 @@ defmodule Block.Listener do
   use GenServer
   require Logger
 
-  @block_listener_registry TpIasc.Registry
+  @listener_registry Block.ListenerRegistry
 
   def init(node_id) do
     Logger.info("Block listener started with id: #{inspect(node_id)}")
@@ -23,7 +23,7 @@ defmodule Block.Listener do
   end
 
   defp via_tuple(node_id),
-    do: {:via, Horde.Registry, {@block_listener_registry, {:block_listener, node_id}}}
+    do: {:via, Registry, {@listener_registry, {:block_listener, node_id}}}
 
   def handle_call({:get, key}, _from, node_id) do
     # TODO: send replica number, now it's hardcoded in 1

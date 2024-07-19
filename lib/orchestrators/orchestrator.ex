@@ -95,7 +95,7 @@ defmodule Orchestrators.Orchestrator do
   end
 
   defp call_action_to_node(n, action) do
-    case get_node_from_number(n) do
+    case get_listener_from_number(n) do
       [{pid, _value}] ->
         GenServer.call(pid, action)
 
@@ -106,7 +106,7 @@ defmodule Orchestrators.Orchestrator do
   end
 
   defp cast_action_to_node(n, action) do
-    case get_node_from_number(n) do
+    case get_listener_from_number(n) do
       [{pid, _value}] ->
         GenServer.cast(pid, action)
 
@@ -119,8 +119,8 @@ defmodule Orchestrators.Orchestrator do
     :erlang.phash2(key, node_quantity)
   end
 
-  def get_node_from_number(node_number) do
-    Horde.Registry.lookup(@dictionary_registry, {:block_listener, node_number})
+  def get_listener_from_number(node_number) do
+    Registry.lookup(Block.ListenerRegistry, {:block_listener, node_number})
   end
 
   def handle_info(:ping_master, state) do
