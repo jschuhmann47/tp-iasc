@@ -65,7 +65,7 @@ defmodule TpIasc.Helpers do
   def log_dictionary_pids do
     for dictionary_id <- list_dictionaries() do
       dictionary_pid =
-        case Horde.Registry.lookup(TpIasc.Registry, {:block_dictionary, dictionary_id}) do
+        case Horde.Registry.lookup(TpIasc.Registry, dictionary_id) do
           [{pid, _}] -> pid
           [] -> :undefined
         end
