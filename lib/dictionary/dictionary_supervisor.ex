@@ -82,10 +82,15 @@ defmodule Block.DictionarySupervisor do
   end
 
   defp adjust_replication(dictionary_id, replication_factor, existing_replicas) do
-    existing_replica_ids = Enum.map(existing_replicas, fn {:block_dictionary, ^dictionary_id, replica_id} -> replica_id end)
+    existing_replica_ids =
+      Enum.map(existing_replicas, fn {:block_dictionary, ^dictionary_id, replica_id} ->
+        replica_id
+      end)
+
     desired_replica_ids = Enum.to_list(1..replication_factor)
 
-    missing_replica_ids = Enum.filter(desired_replica_ids, fn id -> id not in existing_replica_ids end)
+    missing_replica_ids =
+      Enum.filter(desired_replica_ids, fn id -> id not in existing_replica_ids end)
 
     Logger.info(
       "Ajustando la replicación para dictionary #{dictionary_id}. Faltan #{length(missing_replica_ids)} réplicas."
@@ -94,7 +99,8 @@ defmodule Block.DictionarySupervisor do
     for replica_id <- missing_replica_ids do
       case Horde.DynamicSupervisor.start_child(__MODULE__, %{
              id: {:block_dictionary, dictionary_id, replica_id},
-             start: {Block.Dictionary, :start_link, [{:block_dictionary, dictionary_id, replica_id}]},
+             start:
+               {Block.Dictionary, :start_link, [{:block_dictionary, dictionary_id, replica_id}]},
              restart: :transient
            }) do
         {:ok, pid} ->
