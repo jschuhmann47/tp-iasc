@@ -61,13 +61,13 @@ defmodule Orchestrators.Orchestrator do
     {:reply, res, state}
   end
 
-  def handle_call({:keys_distribution}, _from, state) do
+  def handle_call(:keys_distribution, _from, state) do
     %{dictionary_count: dictionary_count} = state
 
     keys_distribution =
       0..dictionary_count
       |> Enum.map(fn node_number ->
-        keys = call_action_to_node(node_number, {:keys_distribution})
+        keys = call_action_to_node(node_number, :keys_distribution)
         {node_number, keys}
       end)
 
