@@ -68,7 +68,7 @@ defmodule Block.Dictionary do
       TpIasc.Helpers.list_dictionaries()
       |> Enum.find(fn x ->
         case x do
-          {:block_dictionary, n, r} when n == id and r == replica -> true
+          {:block_dictionary, n, r} when n == id and r != replica -> true
           _ -> false
         end
       end)
