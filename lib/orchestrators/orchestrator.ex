@@ -125,20 +125,26 @@ defmodule Orchestrators.Orchestrator do
 
   def handle_info(:ping_master, state) do
     %{master_name: master_name} = state
+
+    if master_name == nil do
+      select_master(state)
+    end
+
     if !am_i_master?(state) do
       if master_name == nil do
         select_master(state)
-    else
-      try do
-        res = GenServer.call(via_tuple(master_name), :is_master)
-        case res do
-        true -> {:noreply, state}
-        false -> select_master(state)
+      else
+        try do
+          res = GenServer.call(via_tuple(master_name), :is_master)
+
+          case res do
+            true -> {:noreply, state}
+            false -> select_master(state)
+          end
+        catch
+          _ -> select_master(state)
         end
-      catch
-        _ -> select_master(state)
       end
-    end
     else
       {:noreply, state}
     end
@@ -169,9 +175,5 @@ defmodule Orchestrators.Orchestrator do
   defp am_i_master?(state) do
     %{master_name: master_name, my_name: my_name} = state
     master_name == my_name
-  end
-
-  defp is_master_alive?(master_name) do
-    TpIasc.Helpers.get_master() == master_name
   end
 end
