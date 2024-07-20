@@ -127,6 +127,7 @@ defmodule Orchestrators.Orchestrator do
     %{master_name: master_name} = state
     # Logger.debug("state: #{inspect(state)}")
     if !am_i_master?(state) do
+      # TODO: handle if master died then this call won't succeed
       res = GenServer.call(via_tuple(master_name), :is_master)
 
       case res do

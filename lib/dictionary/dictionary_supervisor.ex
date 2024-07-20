@@ -7,7 +7,7 @@ defmodule Block.DictionarySupervisor do
   end
 
   def start_child(child_spec) do
-    Horde.DynamicSupervisor.start_child(__MODULE__, child_spec)
+    Horde.DynamicSupervisor.start_child(TpIasc.DistributedSupervisor, child_spec)
     # Horde.Registry.register(TpIasc.Registry, name, pid)
   end
 

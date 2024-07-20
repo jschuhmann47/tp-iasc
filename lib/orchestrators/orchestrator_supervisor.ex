@@ -23,7 +23,7 @@ defmodule OrchestratorSupervisor do
 
     Logger.info("Attempting to start orchestrator #{name} with spec #{inspect(child_spec)}")
 
-    case Horde.DynamicSupervisor.start_child(__MODULE__, child_spec) do
+    case Horde.DynamicSupervisor.start_child(TpIasc.DistributedSupervisor, child_spec) do
       {:ok, pid} ->
         Logger.info("Started orchestrator #{name} with pid #{inspect(pid)}")
 
