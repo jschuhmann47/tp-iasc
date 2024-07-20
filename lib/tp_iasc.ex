@@ -44,13 +44,6 @@ defmodule TpIasc do
     MainSupervisor.init_child_processes()
   end
 
-  # defp assign_random_master do
-  #   :timer.sleep(1000)
-  #   orchestrators = [Orchestrator1, Orchestrator2, Orchestrator3, Orchestrator4, Orchestrator5]
-  #   random_orchestrator = Enum.random(orchestrators)
-  #   orchestrators |> Enum.each(fn o -> GenServer.cast(o, {:set_master, random_orchestrator}) end)
-  # end
-
   defp start_orchestrator do
     node_name = Node.self() |> to_string()
     orchestrator_name = :"Orchestrator_#{node_name}"
