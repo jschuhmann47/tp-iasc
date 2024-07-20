@@ -14,6 +14,7 @@ defmodule Orchestrators.Orchestrator do
 
   def init({dictionary_count, name}) do
     # this is so it's unlikely for two orchestrators to initiate selection at the same time
+    :net_kernel.monitor_nodes(true)
     interval = 4000 + :rand.uniform(2000)
     :timer.send_interval(interval, :ping_master)
 
@@ -175,5 +176,20 @@ defmodule Orchestrators.Orchestrator do
   defp am_i_master?(state) do
     %{master_name: master_name, my_name: my_name} = state
     master_name == my_name
+  end
+
+
+  def handle_info({:nodeup, _node}, state) do
+    Logger.info("Node joined the cluster")
+    :timer.sleep(2000)
+    Block.DictionarySupervisor.adjust_all_replications()
+    {:noreply, state}
+  end
+
+  def handle_info({:nodedown, _node}, state) do
+    Logger.info("Node left the cluster")
+    :timer.sleep(2000)
+    Block.DictionarySupervisor.adjust_all_replications()
+    {:noreply, state}
   end
 end
