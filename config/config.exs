@@ -4,9 +4,7 @@ config :tp_iasc,
   dictionary_count: 10,
   replication_factor: 3,
   max_node_capacity: 3,
-  log_level: :debug,
-  # Configuración fija del puerto HTTP
-  http_port: 8051
+  log_level: :debug
 
 config :libcluster,
   topologies: [

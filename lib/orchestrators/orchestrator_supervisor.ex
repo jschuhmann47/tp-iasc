@@ -34,31 +34,32 @@ defmodule OrchestratorSupervisor do
           GenServer.cast(pid, {:set_master, Helpers.get_master()})
         end
 
-        case Horde.Registry.register(TpIasc.Registry, name, pid) do
-          {:ok, registered_pid} ->
-            Logger.info("Registered orchestrator #{name} with pid #{inspect(registered_pid)}")
+        # This registration is not necessary since it's registered when start_child runs
+        # case Horde.Registry.register(TpIasc.Registry, name, pid) do
+        #   {:ok, registered_pid} ->
+        #     Logger.info("Registered orchestrator #{name} with pid #{inspect(registered_pid)}")
 
-            if pid != registered_pid do
-              Logger.warning(
-                "Mismatch in PIDs: started pid #{inspect(pid)}, registered pid #{inspect(registered_pid)}"
-              )
-            end
+        #     if pid != registered_pid do
+        #       Logger.warning(
+        #         "Mismatch in PIDs: started pid #{inspect(pid)}, registered pid #{inspect(registered_pid)}"
+        #       )
+        #     end
 
-            {:ok, registered_pid}
+        #     {:ok, registered_pid}
 
-          {:error, {:already_registered, registered_pid}} ->
-            Logger.info(
-              "Orchestrator #{name} is already registered with pid #{inspect(registered_pid)}"
-            )
+        #   {:error, {:already_registered, registered_pid}} ->
+        #     Logger.info(
+        #       "Orchestrator #{name} is already registered with pid #{inspect(registered_pid)}"
+        #     )
 
-            if pid != registered_pid do
-              Logger.warning(
-                "Mismatch in PIDs: started pid #{inspect(pid)}, already registered pid #{inspect(registered_pid)}"
-              )
-            end
+        #     if pid != registered_pid do
+        #       Logger.warning(
+        #         "Mismatch in PIDs: started pid #{inspect(pid)}, already registered pid #{inspect(registered_pid)}"
+        #       )
+        #     end
 
-            {:ok, registered_pid}
-        end
+
+            {:ok, pid}
 
       {:error, {:already_started, pid}} ->
         Logger.info("Orchestrator #{name} is already started with pid #{inspect(pid)}")
