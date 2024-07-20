@@ -125,15 +125,25 @@ defmodule Orchestrators.Orchestrator do
 
   def handle_info(:ping_master, state) do
     %{master_name: master_name} = state
-    # Logger.debug("state: #{inspect(state)}")
-    if !am_i_master?(state) do
-      res = GenServer.call(via_tuple(master_name), :is_master)
 
-      case res do
-        true -> {:noreply, state}
-        # this covers "false" (the ex-master has been restarted, but it isn't master anymore)
-        # as well as errors (it hasn't been restarted)
-        _ -> select_master(state)
+    if master_name == nil do
+      select_master(state)
+    end
+
+    if !am_i_master?(state) do
+      if master_name == nil do
+        select_master(state)
+      else
+        try do
+          res = GenServer.call(via_tuple(master_name), :is_master)
+
+          case res do
+            true -> {:noreply, state}
+            false -> select_master(state)
+          end
+        catch
+          _ -> select_master(state)
+        end
       end
     else
       {:noreply, state}

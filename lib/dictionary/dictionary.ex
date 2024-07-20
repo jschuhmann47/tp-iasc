@@ -4,10 +4,11 @@ defmodule Block.Dictionary do
 
   @block_dictionary_registry TpIasc.Registry
 
-  def start_link(name, id, replica) do
-    name = via_tuple({name, id, replica})
-    Logger.info("Dictionary started with name: #{inspect(name)}")
-    Agent.start_link(fn -> %{} end, name: name)
+  def start_link({name, id, replica}) do
+    via_name = via_tuple({name, id, replica})
+    replicated_data = get_data_if_replica_exists(id, replica)
+    Logger.info("Dictionary started with name: #{inspect(via_name)}")
+    Agent.start_link(fn -> replicated_data end, name: via_name)
   end
 
   def value(agent, key) do
@@ -55,5 +56,27 @@ defmodule Block.Dictionary do
     Agent.get(agent, &Map.values(&1))
   end
 
+  def get_map(agent) do
+    Logger.debug("Getting whole map from #{inspect(agent)}")
+    Agent.get(agent, & &1)
+  end
+
   def via_tuple(name), do: {:via, Horde.Registry, {@block_dictionary_registry, name}}
+
+  def get_data_if_replica_exists(id, replica) do
+    name =
+      TpIasc.Helpers.list_dictionaries()
+      |> Enum.find(fn x ->
+        case x do
+          {:block_dictionary, n, r} when n == id and r != replica -> true
+          _ -> false
+        end
+      end)
+
+    if name != nil do
+      Block.Dictionary.get_map(via_tuple(name))
+    else
+      %{}
+    end
+  end
 end

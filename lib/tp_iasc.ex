@@ -23,8 +23,7 @@ defmodule TpIasc do
 
     opts = [strategy: :one_for_one, name: TpIasc.Supervisor]
 
-    Supervisor.start_link(children, opts)
-    |> case do
+    case Supervisor.start_link(children, opts) do
       {:ok, pid} ->
         start_supervised_processes()
         monitor_cluster_membership()
@@ -44,13 +43,6 @@ defmodule TpIasc do
     MainSupervisor.start_link([])
     MainSupervisor.init_child_processes()
   end
-
-  # defp assign_random_master do
-  #   :timer.sleep(1000)
-  #   orchestrators = [Orchestrator1, Orchestrator2, Orchestrator3, Orchestrator4, Orchestrator5]
-  #   random_orchestrator = Enum.random(orchestrators)
-  #   orchestrators |> Enum.each(fn o -> GenServer.cast(o, {:set_master, random_orchestrator}) end)
-  # end
 
   defp start_orchestrator do
     node_name = Node.self() |> to_string()
@@ -82,7 +74,7 @@ defmodule TpIasc do
     :net_kernel.monitor_nodes(true)
   end
 
-  def name_application() do
+  defp name_application() do
     Process.register(self(), TpIasc)
   end
 
@@ -94,12 +86,14 @@ defmodule TpIasc do
 
   def handle_info({:nodeup, _node}, state) do
     Logger.info("Node joined the cluster")
+    :timer.sleep(2000)
     Block.DictionarySupervisor.adjust_all_replications()
     {:noreply, state}
   end
 
   def handle_info({:nodedown, _node}, state) do
     Logger.info("Node left the cluster")
+    :timer.sleep(2000)
     Block.DictionarySupervisor.adjust_all_replications()
     {:noreply, state}
   end
