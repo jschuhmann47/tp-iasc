@@ -8,7 +8,6 @@ defmodule Block.DictionarySupervisor do
 
   def start_child(child_spec) do
     Horde.DynamicSupervisor.start_child(TpIasc.DistributedSupervisor, child_spec)
-    # Horde.Registry.register(TpIasc.Registry, name, pid)
   end
 
   def init(_init_arg) do
@@ -51,7 +50,7 @@ defmodule Block.DictionarySupervisor do
 
     if node_count < replication_factor do
       Logger.warning(
-        "Faltan #{replication_factor - node_count} nodos para alcanzar el factor de replicación deseado."
+        "There are #{replication_factor - node_count} nodes missing to reach replication factor."
       )
     end
 
@@ -65,18 +64,18 @@ defmodule Block.DictionarySupervisor do
         end)
 
       Logger.debug(
-        "Dictionary #{i} tiene #{length(replicas)} replicas. Deseadas: #{replication_factor}"
+        "Dictionary #{i} has #{length(replicas)} replicas. Wanted: #{replication_factor}"
       )
 
       if length(replicas) < replication_factor do
         Logger.warning(
-          "El dictionary #{i} tiene menos replicas de las deseadas. Actual: #{length(replicas)}, Deseadas: #{replication_factor}"
+          "Dictionary #{i} has less replicas than wanted. Actual: #{length(replicas)}, Wanted: #{replication_factor}"
         )
 
         adjust_replication(i, replication_factor, replicas)
       else
         Logger.info(
-          "El dictionary #{i} tiene el número correcto de réplicas. Actual: #{length(replicas)}, Deseadas: #{replication_factor}"
+          "Dictionary #{i} has wanted replica count. Actual: #{length(replicas)}, Wanted: #{replication_factor}"
         )
       end
     end
@@ -94,7 +93,7 @@ defmodule Block.DictionarySupervisor do
       Enum.filter(desired_replica_ids, fn id -> id not in existing_replica_ids end)
 
     Logger.info(
-      "Ajustando la replicación para dictionary #{dictionary_id}. Faltan #{length(missing_replica_ids)} réplicas."
+      "Adjusting replication for dictionary #{dictionary_id}. Missing #{length(missing_replica_ids)} replicas."
     )
 
     for replica_id <- missing_replica_ids do
@@ -105,11 +104,11 @@ defmodule Block.DictionarySupervisor do
              restart: :transient
            }) do
         {:ok, pid} ->
-          Logger.info("Replica creada para dictionary #{dictionary_id} con pid #{inspect(pid)}")
+          Logger.info("Replica created for dictionary #{dictionary_id} with pid #{inspect(pid)}")
 
         {:error, reason} ->
           Logger.error(
-            "Error al crear replica para dictionary #{dictionary_id}: #{inspect(reason)}"
+            "Error creating replica for dictionary #{dictionary_id}: #{inspect(reason)}"
           )
       end
     end

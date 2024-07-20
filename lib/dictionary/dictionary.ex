@@ -43,10 +43,10 @@ defmodule Block.Dictionary do
     end
   end
 
-  def delete(agent, key) do
-    Logger.debug("Dictionary(#{inspect(agent)}) deleting key: #{inspect(key)}")
-    Agent.update(agent, &Map.delete(&1, key))
-  end
+  # def delete(agent, key) do
+  #   Logger.debug("Dictionary(#{inspect(agent)}) deleting key: #{inspect(key)}")
+  #   Agent.update(agent, &Map.delete(&1, key))
+  # end
 
   def keys(agent) do
     Agent.get(agent, &Map.keys(&1))
