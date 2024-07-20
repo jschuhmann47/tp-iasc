@@ -21,6 +21,7 @@ defmodule Block.Dictionary do
     Agent.get(agent, &Map.values(:maps.filter(fn _, v -> v < value end, &1)))
   end
 
+  @spec greater(atom() | pid() | {atom(), any()} | {:via, atom(), any()}, any()) :: any()
   def greater(agent, value) do
     Logger.debug("Dictionary(#{inspect(agent)}) getting values greater than: #{inspect(value)}")
     Agent.get(agent, &Map.values(:maps.filter(fn _, v -> v > value end, &1)))
