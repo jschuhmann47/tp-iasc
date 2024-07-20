@@ -14,7 +14,7 @@ defmodule TpIasc do
       {TpIasc.DistributedSupervisor,
        [
          strategy: :one_for_one,
-         distribution_strategy: Horde.UniformQuorumDistribution,
+         distribution_strategy: Horde.UniformDistribution,
          process_redistribution: :active,
          members: :auto
        ]},

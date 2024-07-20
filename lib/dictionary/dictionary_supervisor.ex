@@ -13,7 +13,7 @@ defmodule Block.DictionarySupervisor do
   def init(_init_arg) do
     Horde.DynamicSupervisor.init(
       strategy: :one_for_one,
-      distribution_strategy: Horde.UniformQuorumDistribution,
+      distribution_strategy: Horde.UniformDistribution,
       process_redistribution: :active,
       members: :auto
     )
