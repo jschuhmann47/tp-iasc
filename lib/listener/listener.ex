@@ -117,4 +117,29 @@ defmodule Block.Listener do
       Registry.lookup(@listener_registry, agent)
     end)
   end
+
+  def call_action_to_replica(node_id, key_or_value, action) do
+    case get_first_replica_avaliable(node_id) do
+      nil ->
+        Logger.info("No replica found in node #{node_id}")
+        nil
+
+      agent_name ->
+        Logger.debug("Calling action #{inspect(action)} with #{inspect(key_or_value)} from dictionary #{inspect(agent_name)}")
+        execute_action_in_replica(agent_name, key_or_value, action)
+    end
+  end
+
+  defp execute_action_in_replica(agent_name, key,:value), do: Block.Dictionary.value(agent_name, key)
+  defp execute_action_in_replica(agent_name, value,:lesser), do: Block.Dictionary.lesser(agent_name, value)
+  defp execute_action_in_replica(agent_name, value,:greater), do: Block.Dictionary.greater(agent_name, value)
+
+  defp get_connected_nodes() do
+    # We sum one because Node.list excludes the calling node
+    Node.list() |> length() |> Kernel.+(1)
+  end
+
+  defp have_quorum? do
+    get_connected_nodes() / 2 + 1 > Application.get_env(TpIasc, :node_count, 3)
+  end
 end
