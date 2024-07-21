@@ -124,33 +124,6 @@ defmodule Orchestrators.Orchestrator do
     Registry.lookup(Block.ListenerRegistry, {:block_listener, node_number})
   end
 
-  def handle_info(:ping_master, state) do
-    %{master_name: master_name} = state
-
-    if master_name == nil do
-      select_master(state)
-    end
-
-    if !am_i_master?(state) do
-      if master_name == nil do
-        select_master(state)
-      else
-        try do
-          res = GenServer.call(via_tuple(master_name), :is_master)
-
-          case res do
-            true -> {:noreply, state}
-            false -> select_master(state)
-          end
-        catch
-          _ -> select_master(state)
-        end
-      end
-    else
-      {:noreply, state}
-    end
-  end
-
   defp select_master(state) do
     %{master_name: master_name, my_name: my_name, dictionary_count: dictionary_count} = state
 
@@ -176,6 +149,33 @@ defmodule Orchestrators.Orchestrator do
   defp am_i_master?(state) do
     %{master_name: master_name, my_name: my_name} = state
     master_name == my_name
+  end
+
+  def handle_info(:ping_master, state) do
+    %{master_name: master_name} = state
+
+    if master_name == nil do
+      select_master(state)
+    end
+
+    if !am_i_master?(state) do
+      if master_name == nil do
+        select_master(state)
+      else
+        try do
+          res = GenServer.call(via_tuple(master_name), :is_master)
+
+          case res do
+            true -> {:noreply, state}
+            false -> select_master(state)
+          end
+        catch
+          _ -> select_master(state)
+        end
+      end
+    else
+      {:noreply, state}
+    end
   end
 
   def handle_info({:nodeup, _node}, state) do
