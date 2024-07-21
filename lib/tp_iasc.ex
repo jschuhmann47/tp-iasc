@@ -83,5 +83,4 @@ defmodule TpIasc do
     Logger.configure(level: log_level)
     Logger.info("Starting TP with log level #{log_level}")
   end
-
 end
