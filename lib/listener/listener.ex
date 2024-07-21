@@ -76,7 +76,7 @@ defmodule Block.Listener do
     {:reply, value, node_id}
   end
 
-  def handle_call({:keys_distribution}, _from, node_id) do
+  def handle_call(:keys_distribution, _from, node_id) do
     # TODO: this is using replica 1. Should fix but not necessary
     keys = Block.Dictionary.keys(get_name_from_node_and_replica(node_id, 1))
     {:reply, keys, node_id}

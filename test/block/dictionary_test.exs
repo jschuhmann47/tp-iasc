@@ -3,8 +3,8 @@ defmodule TpIascTest do
   doctest TpIasc
 
   test "inserts a key and gets it" do
-    Block.Dictionary.start_link(__MODULE__)
-    Block.Dictionary.update(__MODULE__, "hola", "chau")
-    assert Block.Dictionary.value(__MODULE__, "hola") == "chau"
+    Block.Dictionary.start_link({:block_dictionary, 1, 1})
+    Block.Dictionary.update({:via, Horde.Registry, {TpIasc.Registry, {:block_dictionary, 1, 1}}}, "hola", "chau")
+    assert Block.Dictionary.value({:via, Horde.Registry, {TpIasc.Registry, {:block_dictionary, 1, 1}}}, "hola") == "chau"
   end
 end

@@ -54,7 +54,7 @@ defmodule Clients.ClientHandler do
   end
 
   get "/keys/distribution" do
-    res = GenServer.call(get_master(), {:keys_distribution})
+    res = GenServer.call(get_master(), :keys_distribution)
     send_resp(conn, 200, "Key distribution: #{inspect(res)}")
   end
 
