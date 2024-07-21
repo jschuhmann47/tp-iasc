@@ -110,7 +110,7 @@ defmodule Block.Listener do
 
   defp get_connected_nodes() do
     # We sum one because Node.list excludes the calling node
-    Node.list() |> length() |> Kernel.+(1)
+    (Node.list() |> length()) + 1
   end
 
   defp have_quorum? do
