@@ -114,6 +114,6 @@ defmodule Block.Listener do
   end
 
   defp have_quorum? do
-    get_connected_nodes() > Application.get_env(TpIasc, :node_count, 3) / 2
+    get_connected_nodes() > Application.get_env(TpIasc, :replication_factor, 3) / 2
   end
 end
