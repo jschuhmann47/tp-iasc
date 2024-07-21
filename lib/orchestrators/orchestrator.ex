@@ -43,7 +43,7 @@ defmodule Orchestrators.Orchestrator do
     %{dictionary_count: dictionary_count} = state
 
     res =
-      0..dictionary_count
+      0..dictionary_count-1
       |> Enum.map(fn x -> call_action_to_node(x, {:get_lesser, value}) end)
       |> List.flatten()
 
@@ -54,7 +54,7 @@ defmodule Orchestrators.Orchestrator do
     %{dictionary_count: dictionary_count} = state
 
     res =
-      0..dictionary_count
+      0..dictionary_count-1
       |> Enum.map(fn x -> call_action_to_node(x, {:get_greater, value}) end)
       |> List.flatten()
 
@@ -65,7 +65,7 @@ defmodule Orchestrators.Orchestrator do
     %{dictionary_count: dictionary_count} = state
 
     keys_distribution =
-      0..dictionary_count
+      0..dictionary_count-1
       |> Enum.map(fn node_number ->
         keys = call_action_to_node(node_number, :keys_distribution)
         {node_number, keys}
