@@ -20,7 +20,7 @@ defmodule TpIascRouterTest do
   test "asks for value" do
     conn =
       :get
-      |> conn("/foo")
+      |> conn("/baz")
       |> ClientHandler.call(@opts)
 
     assert conn.state == :sent
