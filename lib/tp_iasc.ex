@@ -14,7 +14,7 @@ defmodule TpIasc do
       {TpIasc.DistributedSupervisor,
        [
          strategy: :one_for_one,
-         distribution_strategy: Horde.UniformQuorumDistribution,
+         distribution_strategy: Horde.UniformDistribution,
          process_redistribution: :active,
          members: :auto
        ]},
@@ -84,17 +84,17 @@ defmodule TpIasc do
     Logger.info("Starting TP with log level #{log_level}")
   end
 
-  def handle_info({:nodeup, _node}, state) do
-    Logger.info("Node joined the cluster")
-    :timer.sleep(2000)
-    Block.DictionarySupervisor.adjust_all_replications()
-    {:noreply, state}
-  end
+  # def handle_info({:nodeup, _node}, state) do
+  #   Logger.info("Node joined the cluster")
+  #   :timer.sleep(2000)
+  #   Block.DictionarySupervisor.adjust_all_replications()
+  #   {:noreply, state}
+  # end
 
-  def handle_info({:nodedown, _node}, state) do
-    Logger.info("Node left the cluster")
-    :timer.sleep(2000)
-    Block.DictionarySupervisor.adjust_all_replications()
-    {:noreply, state}
-  end
+  # def handle_info({:nodedown, _node}, state) do
+  #   Logger.info("Node left the cluster")
+  #   :timer.sleep(2000)
+  #   Block.DictionarySupervisor.adjust_all_replications()
+  #   {:noreply, state}
+  # end
 end

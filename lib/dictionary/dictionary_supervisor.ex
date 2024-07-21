@@ -13,7 +13,7 @@ defmodule Block.DictionarySupervisor do
   def init(_init_arg) do
     Horde.DynamicSupervisor.init(
       strategy: :one_for_one,
-      distribution_strategy: Horde.UniformQuorumDistribution,
+      distribution_strategy: Horde.UniformDistribution,
       process_redistribution: :active,
       members: :auto
     )
@@ -56,7 +56,7 @@ defmodule Block.DictionarySupervisor do
 
     for i <- 0..(dictionary_count - 1) do
       replicas =
-        Enum.filter(:global.registered_names(), fn name ->
+        Enum.filter(TpIasc.Helpers.list_dictionaries(), fn name ->
           case name do
             {:block_dictionary, ^i, _} -> true
             _ -> false
@@ -97,7 +97,7 @@ defmodule Block.DictionarySupervisor do
     )
 
     for replica_id <- missing_replica_ids do
-      case Horde.DynamicSupervisor.start_child(__MODULE__, %{
+      case Horde.DynamicSupervisor.start_child(TpIasc.DistributedSupervisor, %{
              id: {:block_dictionary, dictionary_id, replica_id},
              start:
                {Block.Dictionary, :start_link, [{:block_dictionary, dictionary_id, replica_id}]},

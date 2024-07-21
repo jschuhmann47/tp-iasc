@@ -26,54 +26,15 @@ defmodule Block.Listener do
     do: {:via, Registry, {@listener_registry, {:block_listener, node_id}}}
 
   def handle_call({:get, key}, _from, node_id) do
-    value =
-      case get_first_replica_avaliable(node_id) do
-        nil ->
-          Logger.info("No replica found in node #{node_id}")
-          nil
-
-        agent_name ->
-          Logger.debug("Getting key #{inspect(key)} from dictionary #{inspect(agent_name)}")
-          Block.Dictionary.value(agent_name, key)
-      end
-
-    {:reply, value, node_id}
+    {:reply, call_action_to_replica(node_id, key, :value), node_id}
   end
 
   def handle_call({:get_lesser, value}, _from, node_id) do
-    value =
-      case get_first_replica_avaliable(node_id) do
-        nil ->
-          Logger.info("No replica found in node #{node_id}")
-          nil
-
-        agent_name ->
-          Logger.debug(
-            "Getting lessers from value #{inspect(value)} from dictionary #{inspect(agent_name)}"
-          )
-
-          Block.Dictionary.lesser(agent_name, value)
-      end
-
-    {:reply, value, node_id}
+    {:reply, call_action_to_replica(node_id, value, :lesser), node_id}
   end
 
   def handle_call({:get_greater, value}, _from, node_id) do
-    value =
-      case get_first_replica_avaliable(node_id) do
-        nil ->
-          Logger.info("No replica found in node #{node_id}")
-          nil
-
-        agent_name ->
-          Logger.debug(
-            "Getting greaters from value #{inspect(value)} from dictionary #{inspect(agent_name)}"
-          )
-
-          Block.Dictionary.greater(agent_name, value)
-      end
-
-    {:reply, value, node_id}
+    {:reply, call_action_to_replica(node_id, value, :greater), node_id}
   end
 
   def handle_call(:keys_distribution, _from, node_id) do
@@ -83,7 +44,12 @@ defmodule Block.Listener do
   end
 
   def handle_cast({:put, key, value}, node_id) do
-    send_to_all_replicas(node_id, key, value)
+    if !have_quorum?() do
+      Logger.warning("Don't have quorum to do a key update")
+    else
+      send_to_all_replicas(node_id, key, value)
+    end
+
     {:noreply, node_id}
   end
 
@@ -116,5 +82,38 @@ defmodule Block.Listener do
     |> Enum.find(nil, fn agent ->
       Registry.lookup(@listener_registry, agent)
     end)
+  end
+
+  def call_action_to_replica(node_id, key_or_value, action) do
+    case get_first_replica_avaliable(node_id) do
+      nil ->
+        Logger.info("No replica found in node #{node_id}")
+        nil
+
+      agent_name ->
+        Logger.debug(
+          "Calling action #{inspect(action)} with #{inspect(key_or_value)} from dictionary #{inspect(agent_name)}"
+        )
+
+        execute_action_in_replica(agent_name, key_or_value, action)
+    end
+  end
+
+  defp execute_action_in_replica(agent_name, key, :value),
+    do: Block.Dictionary.value(agent_name, key)
+
+  defp execute_action_in_replica(agent_name, value, :lesser),
+    do: Block.Dictionary.lesser(agent_name, value)
+
+  defp execute_action_in_replica(agent_name, value, :greater),
+    do: Block.Dictionary.greater(agent_name, value)
+
+  defp get_connected_nodes() do
+    # We sum one because Node.list excludes the calling node
+    (Node.list() |> length()) + 1
+  end
+
+  defp have_quorum? do
+    get_connected_nodes() > Application.get_env(TpIasc, :node_count, 3) / 2
   end
 end

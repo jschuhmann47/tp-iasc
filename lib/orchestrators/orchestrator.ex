@@ -14,6 +14,7 @@ defmodule Orchestrators.Orchestrator do
 
   def init({dictionary_count, name}) do
     # this is so it's unlikely for two orchestrators to initiate selection at the same time
+    :net_kernel.monitor_nodes(true)
     interval = 4000 + :rand.uniform(2000)
     :timer.send_interval(interval, :ping_master)
 
@@ -43,7 +44,7 @@ defmodule Orchestrators.Orchestrator do
     %{dictionary_count: dictionary_count} = state
 
     res =
-      0..dictionary_count-1
+      0..(dictionary_count - 1)
       |> Enum.map(fn x -> call_action_to_node(x, {:get_lesser, value}) end)
       |> List.flatten()
 
@@ -54,7 +55,7 @@ defmodule Orchestrators.Orchestrator do
     %{dictionary_count: dictionary_count} = state
 
     res =
-      0..dictionary_count-1
+      0..(dictionary_count - 1)
       |> Enum.map(fn x -> call_action_to_node(x, {:get_greater, value}) end)
       |> List.flatten()
 
@@ -65,7 +66,7 @@ defmodule Orchestrators.Orchestrator do
     %{dictionary_count: dictionary_count} = state
 
     keys_distribution =
-      0..dictionary_count-1
+      0..(dictionary_count - 1)
       |> Enum.map(fn node_number ->
         keys = call_action_to_node(node_number, :keys_distribution)
         {node_number, keys}
@@ -123,6 +124,33 @@ defmodule Orchestrators.Orchestrator do
     Registry.lookup(Block.ListenerRegistry, {:block_listener, node_number})
   end
 
+  defp select_master(state) do
+    %{master_name: master_name, my_name: my_name, dictionary_count: dictionary_count} = state
+
+    everyone_but_current_master =
+      Helpers.list_orchestrators() |> Enum.reject(fn o -> o == master_name end)
+
+    one_non_master = everyone_but_current_master |> Enum.random()
+
+    Helpers.list_orchestrators()
+    |> Enum.map(fn o ->
+      GenServer.cast(Orchestrators.Orchestrator.via_tuple(o), {:set_master, one_non_master})
+    end)
+
+    new_state = %{
+      my_name: my_name,
+      dictionary_count: dictionary_count,
+      master_name: one_non_master
+    }
+
+    {:noreply, new_state}
+  end
+
+  defp am_i_master?(state) do
+    %{master_name: master_name, my_name: my_name} = state
+    master_name == my_name
+  end
+
   def handle_info(:ping_master, state) do
     %{master_name: master_name} = state
 
@@ -150,30 +178,17 @@ defmodule Orchestrators.Orchestrator do
     end
   end
 
-  defp select_master(state) do
-    %{master_name: master_name, my_name: my_name, dictionary_count: dictionary_count} = state
-
-    everyone_but_current_master =
-      Helpers.list_orchestrators() |> Enum.reject(fn o -> o == master_name end)
-
-    one_non_master = everyone_but_current_master |> Enum.random()
-
-    Helpers.list_orchestrators()
-    |> Enum.map(fn o ->
-      GenServer.cast(Orchestrators.Orchestrator.via_tuple(o), {:set_master, one_non_master})
-    end)
-
-    new_state = %{
-      my_name: my_name,
-      dictionary_count: dictionary_count,
-      master_name: one_non_master
-    }
-
-    {:noreply, new_state}
+  def handle_info({:nodeup, _node}, state) do
+    Logger.info("Node joined the cluster")
+    :timer.sleep(2000)
+    Block.DictionarySupervisor.adjust_all_replications()
+    {:noreply, state}
   end
 
-  defp am_i_master?(state) do
-    %{master_name: master_name, my_name: my_name} = state
-    master_name == my_name
+  def handle_info({:nodedown, _node}, state) do
+    Logger.info("Node left the cluster")
+    :timer.sleep(2000)
+    Block.DictionarySupervisor.adjust_all_replications()
+    {:noreply, state}
   end
 end
