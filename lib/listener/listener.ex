@@ -44,7 +44,11 @@ defmodule Block.Listener do
   end
 
   def handle_cast({:put, key, value}, node_id) do
-    send_to_all_replicas(node_id, key, value)
+    if !have_quorum?() do
+      Logger.warning("Don't have quorum to do a key update")
+    else
+      send_to_all_replicas(node_id, key, value)
+    end
     {:noreply, node_id}
   end
 
@@ -101,6 +105,6 @@ defmodule Block.Listener do
   end
 
   defp have_quorum? do
-    get_connected_nodes() / 2 + 1 > Application.get_env(TpIasc, :node_count, 3)
+    get_connected_nodes() > Application.get_env(TpIasc, :node_count, 3) / 2
   end
 end
