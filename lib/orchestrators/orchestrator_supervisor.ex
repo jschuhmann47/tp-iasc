@@ -58,8 +58,7 @@ defmodule OrchestratorSupervisor do
         #       )
         #     end
 
-
-            {:ok, pid}
+        {:ok, pid}
 
       {:error, {:already_started, pid}} ->
         Logger.info("Orchestrator #{name} is already started with pid #{inspect(pid)}")

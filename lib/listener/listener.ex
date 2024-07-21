@@ -49,6 +49,7 @@ defmodule Block.Listener do
     else
       send_to_all_replicas(node_id, key, value)
     end
+
     {:noreply, node_id}
   end
 
@@ -90,14 +91,22 @@ defmodule Block.Listener do
         nil
 
       agent_name ->
-        Logger.debug("Calling action #{inspect(action)} with #{inspect(key_or_value)} from dictionary #{inspect(agent_name)}")
+        Logger.debug(
+          "Calling action #{inspect(action)} with #{inspect(key_or_value)} from dictionary #{inspect(agent_name)}"
+        )
+
         execute_action_in_replica(agent_name, key_or_value, action)
     end
   end
 
-  defp execute_action_in_replica(agent_name, key,:value), do: Block.Dictionary.value(agent_name, key)
-  defp execute_action_in_replica(agent_name, value,:lesser), do: Block.Dictionary.lesser(agent_name, value)
-  defp execute_action_in_replica(agent_name, value,:greater), do: Block.Dictionary.greater(agent_name, value)
+  defp execute_action_in_replica(agent_name, key, :value),
+    do: Block.Dictionary.value(agent_name, key)
+
+  defp execute_action_in_replica(agent_name, value, :lesser),
+    do: Block.Dictionary.lesser(agent_name, value)
+
+  defp execute_action_in_replica(agent_name, value, :greater),
+    do: Block.Dictionary.greater(agent_name, value)
 
   defp get_connected_nodes() do
     # We sum one because Node.list excludes the calling node

@@ -56,7 +56,7 @@ defmodule Block.DictionarySupervisor do
 
     for i <- 0..(dictionary_count - 1) do
       replicas =
-        Enum.filter(TpIasc.Helpers.list_dictionaries, fn name ->
+        Enum.filter(TpIasc.Helpers.list_dictionaries(), fn name ->
           case name do
             {:block_dictionary, ^i, _} -> true
             _ -> false
