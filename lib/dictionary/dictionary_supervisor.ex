@@ -45,8 +45,7 @@ defmodule Block.DictionarySupervisor do
   def adjust_all_replications do
     dictionary_count = Application.get_env(:tp_iasc, :dictionary_count)
     replication_factor = Application.get_env(:tp_iasc, :replication_factor)
-    nodes = Node.list() ++ [Node.self()]
-    node_count = length(nodes)
+    node_count = length(Node.list()) + 1
 
     if node_count < replication_factor do
       Logger.warning(
@@ -62,10 +61,6 @@ defmodule Block.DictionarySupervisor do
             _ -> false
           end
         end)
-
-      Logger.debug(
-        "Dictionary #{i} has #{length(replicas)} replicas. Wanted: #{replication_factor}"
-      )
 
       if length(replicas) < replication_factor do
         Logger.warning(

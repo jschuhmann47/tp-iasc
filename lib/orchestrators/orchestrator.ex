@@ -37,29 +37,15 @@ defmodule Orchestrators.Orchestrator do
   def handle_call({:get, key}, _from, state) do
     %{dictionary_count: dictionary_count} = state
     node_number = node_number_from_key(key, dictionary_count)
-    {:reply, call_action_to_node(node_number, {:get, key}), state}
+    {:reply, cast_or_call_action_to_node(:call, node_number, {:get, key}), state}
   end
 
   def handle_call({:get_lesser, value}, _from, state) do
-    %{dictionary_count: dictionary_count} = state
-
-    res =
-      0..(dictionary_count - 1)
-      |> Enum.map(fn x -> call_action_to_node(x, {:get_lesser, value}) end)
-      |> List.flatten()
-
-    {:reply, res, state}
+    call_action_to_all_nodes(state, :get_lesser, value)
   end
 
   def handle_call({:get_greater, value}, _from, state) do
-    %{dictionary_count: dictionary_count} = state
-
-    res =
-      0..(dictionary_count - 1)
-      |> Enum.map(fn x -> call_action_to_node(x, {:get_greater, value}) end)
-      |> List.flatten()
-
-    {:reply, res, state}
+    call_action_to_all_nodes(state, :get_greater, value)
   end
 
   def handle_call(:keys_distribution, _from, state) do
@@ -68,11 +54,23 @@ defmodule Orchestrators.Orchestrator do
     keys_distribution =
       0..(dictionary_count - 1)
       |> Enum.map(fn node_number ->
-        keys = call_action_to_node(node_number, :keys_distribution)
+        keys = cast_or_call_action_to_node(:call, node_number, :keys_distribution)
         {node_number, keys}
       end)
 
     {:reply, keys_distribution, state}
+  end
+
+  def call_action_to_all_nodes(state, action, value) do
+    %{dictionary_count: dictionary_count} = state
+
+    res =
+      0..(dictionary_count - 1)
+      |> Enum.map(fn x -> cast_or_call_action_to_node(:call, x, {action, value}) end)
+      |> List.flatten()
+      |> Enum.sort()
+
+    {:reply, res, state}
   end
 
   def handle_cast({:set_master, master_name}, state) do
@@ -91,30 +89,23 @@ defmodule Orchestrators.Orchestrator do
     %{dictionary_count: dictionary_count} = state
     node_number = node_number_from_key(key, dictionary_count)
 
-    cast_action_to_node(node_number, {:put, key, value})
+    cast_or_call_action_to_node(:cast, node_number, {:put, key, value})
     {:noreply, state}
   end
 
-  defp call_action_to_node(n, action) do
+  defp cast_or_call_action_to_node(calltype, n, action) do
     case get_listener_from_number(n) do
       [{pid, _value}] ->
-        GenServer.call(pid, action)
+        cast_or_call(calltype, pid, action)
 
       [] ->
-        Logger.error("Cannot call action: No process found for node_number #{n}")
+        Logger.error("Cannot #{calltype} action: No process found for node_number #{n}")
         nil
     end
   end
 
-  defp cast_action_to_node(n, action) do
-    case get_listener_from_number(n) do
-      [{pid, _value}] ->
-        GenServer.cast(pid, action)
-
-      [] ->
-        Logger.error("Cannot cast action: No process found for node_number #{n}")
-    end
-  end
+  defp cast_or_call(:cast, pid, action), do: GenServer.cast(pid, action)
+  defp cast_or_call(:call, pid, action), do: GenServer.call(pid, action)
 
   def node_number_from_key(key, node_quantity) do
     :erlang.phash2(key, node_quantity)
@@ -179,14 +170,15 @@ defmodule Orchestrators.Orchestrator do
   end
 
   def handle_info({:nodeup, _node}, state) do
-    Logger.info("Node joined the cluster")
-    :timer.sleep(2000)
-    Block.DictionarySupervisor.adjust_all_replications()
-    {:noreply, state}
+    node_update("joined", state)
   end
 
   def handle_info({:nodedown, _node}, state) do
-    Logger.info("Node left the cluster")
+    node_update("left", state)
+  end
+
+  defp node_update(calltype, state) do
+    Logger.info("Node #{calltype} the cluster")
     :timer.sleep(2000)
     Block.DictionarySupervisor.adjust_all_replications()
     {:noreply, state}

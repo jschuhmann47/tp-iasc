@@ -97,10 +97,6 @@ defmodule TpIasc.Helpers do
     log_local_listeners()
   end
 
-  def list_global_names do
-    :global.registered_names()
-  end
-
   defp node_of_pid(pid) when is_pid(pid), do: :erlang.node(pid)
   defp node_of_pid(_), do: :undefined
 end

@@ -34,8 +34,8 @@ defmodule Clients.ClientHandler do
       res = GenServer.call(get_master(), {:get_lesser, value})
 
       case res do
-        [] -> send_resp(conn, 404, "Not found")
-        res -> send_resp(conn, 200, "Lesser values than #{value}: #{Enum.join(res, " ")}")
+        [] -> send_resp(conn, 404, "There are no values lesser than #{value}")
+        res -> send_resp(conn, 200, "Lesser values than #{value}: #{generate_printable_list(res)}")
       end
     end
   end
@@ -47,8 +47,8 @@ defmodule Clients.ClientHandler do
       res = GenServer.call(get_master(), {:get_greater, value})
 
       case res do
-        [] -> send_resp(conn, 404, "Not found")
-        res -> send_resp(conn, 200, "Values greater than #{value}: #{Enum.join(res, " ")}")
+        [] -> send_resp(conn, 404, "There are no values greater than #{value}")
+        res -> send_resp(conn, 200, "Values greater than #{value}: #{generate_printable_list(res)}")
       end
     end
   end
@@ -78,4 +78,9 @@ defmodule Clients.ClientHandler do
   def check_length(key) do
     String.length(key) > @max_length
   end
+
+  defp generate_printable_list(list) do
+    Enum.join(list, ", ") |> String.slice(0..-1)
+  end
+
 end
