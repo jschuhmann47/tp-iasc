@@ -26,54 +26,15 @@ defmodule Block.Listener do
     do: {:via, Registry, {@listener_registry, {:block_listener, node_id}}}
 
   def handle_call({:get, key}, _from, node_id) do
-    value =
-      case get_first_replica_avaliable(node_id) do
-        nil ->
-          Logger.info("No replica found in node #{node_id}")
-          nil
-
-        agent_name ->
-          Logger.debug("Getting key #{inspect(key)} from dictionary #{inspect(agent_name)}")
-          Block.Dictionary.value(agent_name, key)
-      end
-
-    {:reply, value, node_id}
+    {:reply, call_action_to_replica(node_id, key, :value), node_id}
   end
 
   def handle_call({:get_lesser, value}, _from, node_id) do
-    value =
-      case get_first_replica_avaliable(node_id) do
-        nil ->
-          Logger.info("No replica found in node #{node_id}")
-          nil
-
-        agent_name ->
-          Logger.debug(
-            "Getting lessers from value #{inspect(value)} from dictionary #{inspect(agent_name)}"
-          )
-
-          Block.Dictionary.lesser(agent_name, value)
-      end
-
-    {:reply, value, node_id}
+    {:reply, call_action_to_replica(node_id, value, :lesser), node_id}
   end
 
   def handle_call({:get_greater, value}, _from, node_id) do
-    value =
-      case get_first_replica_avaliable(node_id) do
-        nil ->
-          Logger.info("No replica found in node #{node_id}")
-          nil
-
-        agent_name ->
-          Logger.debug(
-            "Getting greaters from value #{inspect(value)} from dictionary #{inspect(agent_name)}"
-          )
-
-          Block.Dictionary.greater(agent_name, value)
-      end
-
-    {:reply, value, node_id}
+    {:reply, call_action_to_replica(node_id, value, :greater), node_id}
   end
 
   def handle_call(:keys_distribution, _from, node_id) do
