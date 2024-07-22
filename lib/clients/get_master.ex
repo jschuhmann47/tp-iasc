@@ -5,7 +5,6 @@ defmodule Clients.GetMaster do
 
   def start_link() do
     Logger.info("GetMaster started")
-    # TODO, add name and store it in registry
     Agent.start_link(fn -> %{} end, name: __MODULE__)
   end
 

@@ -27,6 +27,13 @@ defmodule Clients.ClientHandler do
     end
   end
 
+  delete "/:key" do
+
+    GenServer.cast(get_master(), {:delete, key})
+      send_resp(conn, 200, "Deleted key '#{key}'")
+
+  end
+
   get "/lesser/:value" do
     if check_length(value) do
       send_resp(conn, 401, "Value exceeds max length")
@@ -86,6 +93,7 @@ defmodule Clients.ClientHandler do
   end
 
   defp generate_printable_list(list) do
-    Enum.join(list, ", ") |> String.slice(0..-1)
+    str = Enum.join(list, ", ")
+    String.slice(str, 0..String.length(str)-1)
   end
 end

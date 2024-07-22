@@ -47,13 +47,23 @@ defmodule Block.Listener do
     if !have_quorum?() do
       Logger.warning("Don't have quorum to do a key update")
     else
-      send_to_all_replicas(node_id, key, value)
+      send_action_to_all_replicas(node_id, key, value, :put)
     end
 
     {:noreply, node_id}
   end
 
-  defp send_to_all_replicas(node_id, key, value) do
+  def handle_cast({:delete, key}, node_id) do
+    if !have_quorum?() do
+      Logger.warning("Don't have quorum to do a key update")
+    else
+      send_action_to_all_replicas(node_id, key, nil, :delete)
+    end
+
+    {:noreply, node_id}
+  end
+
+  defp send_action_to_all_replicas(node_id, key, value, action) do
     max = Application.get_env(:tp_iasc, :replication_factor, 3)
 
     1..max
@@ -61,12 +71,15 @@ defmodule Block.Listener do
       agent_name = get_name_from_node_and_replica(node_id, replica)
 
       Logger.debug(
-        "Sending key #{inspect(key)} with value #{inspect(value)} to replica #{inspect(agent_name)}"
+        "Action #{inspect(action)}: sending key #{inspect(key)} with value #{inspect(value)} to replica #{inspect(agent_name)}"
       )
 
-      Block.Dictionary.update(agent_name, key, value)
+      cast_action_to_replica(agent_name, key, value, action)
     end)
   end
+
+  def cast_action_to_replica(agent_name, key, value, :put), do: Block.Dictionary.update(agent_name, key, value)
+  def cast_action_to_replica(agent_name, key, _value, :delete), do: Block.Dictionary.delete(agent_name, key)
 
   def get_name_from_node_and_replica(node, replica) do
     Block.Dictionary.via_tuple({:block_dictionary, node, replica})
