@@ -44,20 +44,18 @@ defmodule Block.Listener do
   end
 
   def handle_cast({:put, key, value}, node_id) do
-    if !have_quorum?() do
-      Logger.warning("Don't have quorum to do a key update")
-    else
-      send_action_to_all_replicas(node_id, key, value, :put)
-    end
-
-    {:noreply, node_id}
+    send_action_checking_quorum(node_id, key, value, :put)
   end
 
   def handle_cast({:delete, key}, node_id) do
+    send_action_checking_quorum(node_id, key, nil, :delete)
+  end
+
+  def send_action_checking_quorum(node_id, key, value, action) do
     if !have_quorum?() do
-      Logger.warning("Don't have quorum to do a key update")
+      Logger.warning("Don't have quorum to do action #{inspect(action)}")
     else
-      send_action_to_all_replicas(node_id, key, nil, :delete)
+      send_action_to_all_replicas(node_id, key, value, action)
     end
 
     {:noreply, node_id}
