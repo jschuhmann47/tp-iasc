@@ -28,10 +28,8 @@ defmodule Clients.ClientHandler do
   end
 
   delete "/:key" do
-
     GenServer.cast(get_master(), {:delete, key})
-      send_resp(conn, 200, "Deleted key '#{key}'")
-
+    send_resp(conn, 200, "Deleted key '#{key}'")
   end
 
   get "/lesser/:value" do
@@ -94,6 +92,6 @@ defmodule Clients.ClientHandler do
 
   defp generate_printable_list(list) do
     str = Enum.join(list, ", ")
-    String.slice(str, 0..String.length(str)-1)
+    String.slice(str, 0..(String.length(str) - 1))
   end
 end

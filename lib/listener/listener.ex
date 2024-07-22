@@ -78,8 +78,11 @@ defmodule Block.Listener do
     end)
   end
 
-  def cast_action_to_replica(agent_name, key, value, :put), do: Block.Dictionary.update(agent_name, key, value)
-  def cast_action_to_replica(agent_name, key, _value, :delete), do: Block.Dictionary.delete(agent_name, key)
+  def cast_action_to_replica(agent_name, key, value, :put),
+    do: Block.Dictionary.update(agent_name, key, value)
+
+  def cast_action_to_replica(agent_name, key, _value, :delete),
+    do: Block.Dictionary.delete(agent_name, key)
 
   def get_name_from_node_and_replica(node, replica) do
     Block.Dictionary.via_tuple({:block_dictionary, node, replica})
