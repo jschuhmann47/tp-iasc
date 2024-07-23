@@ -85,12 +85,11 @@ defmodule Orchestrators.Orchestrator do
     {:noreply, new_state}
   end
 
-  def handle_cast({:put, key, value}, state) do
+  def handle_call({:put, key, value}, _from, state) do
     %{dictionary_count: dictionary_count} = state
     node_number = node_number_from_key(key, dictionary_count)
 
-    cast_or_call_action_to_node(:cast, node_number, {:put, key, value})
-    {:noreply, state}
+    {:reply, cast_or_call_action_to_node(:call, node_number, {:put, key, value}), state}
   end
 
   def handle_cast({:delete, key}, state) do

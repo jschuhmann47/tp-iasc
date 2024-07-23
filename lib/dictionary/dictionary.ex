@@ -29,6 +29,7 @@ defmodule Block.Dictionary do
   def update(agent, key, value) do
     if exceeds_limit_if_new_key_is_inserted?(agent) do
       Logger.warning("Dictionary(#{inspect(agent)}) is at max capacity. Not inserting key #{inspect(key)} with value #{inspect(value)}")
+      :limit_reached
     else
       Logger.debug("Dictionary(#{inspect(agent)}) updating key: #{inspect(key)} with value #{inspect(value)}")
       Agent.update(agent, &Map.put(&1, key, value))
