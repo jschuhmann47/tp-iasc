@@ -36,9 +36,6 @@ defmodule TpIasc do
   end
 
   defp start_supervised_processes do
-    # Esperar un momento para asegurarse de que todos los nodos se hayan unido al clúster
-    :timer.sleep(2000)
-
     # Iniciar MainSupervisor y sus procesos hijos
     MainSupervisor.start_link([])
     MainSupervisor.init_child_processes()

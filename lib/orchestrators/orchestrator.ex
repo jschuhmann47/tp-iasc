@@ -181,8 +181,8 @@ defmodule Orchestrators.Orchestrator do
     if are_all_nodes_up?() && am_i_master?(state) do
       Logger.info("All nodes are up")
 
-      # sleep for a bit to allow all nodes to be up
-      :timer.sleep(5000)
+      # sleep for a bit to allow all nodes to be fully up
+      :timer.sleep(2000)
 
       Block.DictionarySupervisor.start_dictionaries()
     else

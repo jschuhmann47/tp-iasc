@@ -104,6 +104,7 @@ TpIasc.Helpers.log_all()
 TpIasc.Helpers.log_replication_status()
 
 GenServer.cast(Orchestrators.Orchestrator.via_tuple(:"Orchestrator_node1@127.0.0.1"), {:put, "key1", "value1"})
+GenServer.cast(Orchestrators.Orchestrator.via_tuple(:"Orchestrator_node1@127.0.0.1"), {:put, "key2", "value2"})
 GenServer.call(Orchestrators.Orchestrator.via_tuple(:"Orchestrator_node1@127.0.0.1"), {:get, "key1"})
 
 # Desde el nodo 2
