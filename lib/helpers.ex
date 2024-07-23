@@ -43,6 +43,8 @@ defmodule TpIasc.Helpers do
     n = Application.get_env(:tp_iasc, :max_node_capacity, 50)
     m = Application.get_env(:tp_iasc, :node_quantity, 3)
     r = Application.get_env(:tp_iasc, :replication_factor, 2)
+
+    n*m/r
   end
 
   def list_local_listeners do
