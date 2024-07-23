@@ -69,8 +69,15 @@ defmodule Clients.ClientHandler do
       send_resp(conn, 401, "Key or value exceeds max length")
     else
       case GenServer.call(get_master(), {:put, key, value}) do
-        :ok -> send_resp(conn, 200, "Updated key #{key} with value #{value}")
-        _ -> send_resp(conn, 500, "An error has occurred. Most probably is that some replicas are unavailable")
+        :ok ->
+          send_resp(conn, 200, "Updated key #{key} with value #{value}")
+
+        _ ->
+          send_resp(
+            conn,
+            500,
+            "An error has occurred. Most probably is that some replicas are unavailable"
+          )
       end
     end
   end

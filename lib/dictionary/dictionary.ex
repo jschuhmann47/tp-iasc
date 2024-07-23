@@ -28,10 +28,16 @@ defmodule Block.Dictionary do
 
   def update(agent, key, value) do
     if exceeds_limit_if_new_key_is_inserted?(agent) do
-      Logger.warning("Dictionary(#{inspect(agent)}) is at max capacity. Not inserting key #{inspect(key)} with value #{inspect(value)}")
+      Logger.warning(
+        "Dictionary(#{inspect(agent)}) is at max capacity. Not inserting key #{inspect(key)} with value #{inspect(value)}"
+      )
+
       :limit_reached
     else
-      Logger.debug("Dictionary(#{inspect(agent)}) updating key: #{inspect(key)} with value #{inspect(value)}")
+      Logger.debug(
+        "Dictionary(#{inspect(agent)}) updating key: #{inspect(key)} with value #{inspect(value)}"
+      )
+
       Agent.update(agent, &Map.put(&1, key, value))
     end
   end
@@ -54,8 +60,8 @@ defmodule Block.Dictionary do
   end
 
   defp exceeds_limit_if_new_key_is_inserted?(agent) do
-    key_count = Agent.get(agent, & length(Map.keys(&1)))
-    key_count + 1 > floor(TpIasc.Helpers.get_database_capacity)
+    key_count = Agent.get(agent, &length(Map.keys(&1)))
+    key_count + 1 > floor(TpIasc.Helpers.get_database_capacity())
   end
 
   def via_tuple(name), do: {:via, Horde.Registry, {@block_dictionary_registry, name}}
