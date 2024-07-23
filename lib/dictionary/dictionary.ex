@@ -27,20 +27,8 @@ defmodule Block.Dictionary do
   end
 
   def update(agent, key, value) do
-    len = Agent.get(agent, &Map.keys(&1)) |> length
-    max_length = Application.get_env(:tp_iasc, :key_length, 3)
-
-    if len >= max_length do
-      Logger.warning(
-        "Dictionary(#{inspect(agent)}) at max capacity, not inserting new key/value #{inspect(key)}/#{inspect(value)}"
-      )
-    else
-      Logger.debug(
-        "Dictionary(#{inspect(agent)}) updating key: #{inspect(key)} with value: #{inspect(value)}"
-      )
-
-      Agent.update(agent, &Map.put(&1, key, value))
-    end
+    Logger.debug("Dictionary(#{inspect(agent)}) updating key: #{inspect(key)} with value #{inspect(value)}")
+    Agent.update(agent, &Map.put(&1, key, value))
   end
 
   def delete(agent, key) do
