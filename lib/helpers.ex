@@ -39,6 +39,12 @@ defmodule TpIasc.Helpers do
     ])
   end
 
+  def get_database_capacity() do
+    n = Application.get_env(:tp_iasc, :max_node_capacity, 50)
+    m = Application.get_env(:tp_iasc, :node_quantity, 3)
+    r = Application.get_env(:tp_iasc, :replication_factor, 2)
+  end
+
   def list_local_listeners do
     Registry.select(Block.ListenerRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end

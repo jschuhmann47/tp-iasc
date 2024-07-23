@@ -82,11 +82,11 @@ defmodule Clients.ClientHandler do
   end
 
   def check_length(str, :key) do
-    String.length(str) > Application.get_env(TpIasc, :key_length, 10)
+    String.length(str) > Application.get_env(:tp_iasc, :key_length, 10)
   end
 
   def check_length(str, :value) do
-    String.length(str) > Application.get_env(TpIasc, :value_length, 10)
+    String.length(str) > Application.get_env(:tp_iasc, :value_length, 10)
   end
 
   defp generate_printable_list(list) do
