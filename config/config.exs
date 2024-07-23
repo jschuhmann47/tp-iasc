@@ -3,7 +3,7 @@ import Config
 config :tp_iasc,
   dictionary_count: 10, # D
   replication_factor: 2, # R
-  key_length: 3, # Key length
+  key_length: 10, # Key length
   value_length: 10, # Value length
   max_node_capacity: 50, # N
   node_quantity: 3, # M
