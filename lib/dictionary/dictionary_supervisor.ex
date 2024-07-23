@@ -3,11 +3,13 @@ defmodule Block.DictionarySupervisor do
   require Logger
 
   def start_link(init_arg) do
+    Logger.debug("#{__MODULE__} starting with init arg #{inspect(init_arg)}")
     Horde.DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
   def start_child(child_spec) do
-    Horde.DynamicSupervisor.start_child(TpIasc.DistributedSupervisor, child_spec)
+    Logger.debug("#{__MODULE__} starting child with spec #{inspect(child_spec)}")
+    Horde.DynamicSupervisor.start_child(__MODULE__, child_spec)
   end
 
   def init(_init_arg) do
@@ -20,93 +22,51 @@ defmodule Block.DictionarySupervisor do
   end
 
   def start_dictionaries do
-    if TpIasc.Helpers.list_dictionaries() == [] do
-      dictionary_count = Application.get_env(:tp_iasc, :dictionary_count, 10)
-      replication_factor = Application.get_env(:tp_iasc, :replication_factor, 3)
+    Logger.debug("#{__MODULE__} starting dictionaries")
+    node_quantity = Application.get_env(:tp_iasc, :node_quantity)
+    actual_node_count = length(Node.list()) + 1
+
+    if actual_node_count == node_quantity do
+      dictionary_count = Application.get_env(:tp_iasc, :dictionary_count)
+      replication_factor = Application.get_env(:tp_iasc, :replication_factor)
 
       children =
         for i <- 0..(dictionary_count - 1) do
-          for j <- 1..replication_factor do
-            Logger.debug("Starting dictionary #{i} replica #{j}")
+          for j <- 0..(replication_factor - 1) do
+            node_index = rem(i + j, node_quantity)
+            node_name = Enum.at(Node.list(), node_index) || Node.self()
+
+            Logger.debug(
+              "#{__MODULE__} starting dictionary #{i} replica #{j} on node #{node_name}"
+            )
 
             %{
               id: {:block_dictionary, i, j},
               start: {Block.Dictionary, :start_link, [{:block_dictionary, i, j}]},
-              restart: :transient
+              restart: :transient,
+              node: node_name
             }
           end
         end
 
       List.flatten(children)
-      |> Enum.each(&start_child/1)
-    end
-  end
-
-  def adjust_all_replications do
-    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count)
-    replication_factor = Application.get_env(:tp_iasc, :replication_factor)
-    node_count = length(Node.list()) + 1
-
-    if node_count < replication_factor do
+      |> Enum.each(&start_distributed_child/1)
+    else
       Logger.warning(
-        "There are #{replication_factor - node_count} nodes missing to reach replication factor."
+        "Node count is #{actual_node_count}, expected #{node_quantity}. Dictionaries will not be started."
       )
     end
-
-    for i <- 0..(dictionary_count - 1) do
-      replicas =
-        Enum.filter(TpIasc.Helpers.list_dictionaries(), fn name ->
-          case name do
-            {:block_dictionary, ^i, _} -> true
-            _ -> false
-          end
-        end)
-
-      if length(replicas) < replication_factor do
-        Logger.warning(
-          "Dictionary #{i} has less replicas than wanted. Actual: #{length(replicas)}, Wanted: #{replication_factor}"
-        )
-
-        adjust_replication(i, replication_factor, replicas)
-      else
-        Logger.info(
-          "Dictionary #{i} has wanted replica count. Actual: #{length(replicas)}, Wanted: #{replication_factor}"
-        )
-      end
-    end
   end
 
-  defp adjust_replication(dictionary_id, replication_factor, existing_replicas) do
-    existing_replica_ids =
-      Enum.map(existing_replicas, fn {:block_dictionary, ^dictionary_id, replica_id} ->
-        replica_id
-      end)
+  defp start_distributed_child(child_spec) do
+    node = Map.get(child_spec, :node, Node.self())
 
-    desired_replica_ids = Enum.to_list(1..replication_factor)
-
-    missing_replica_ids =
-      Enum.filter(desired_replica_ids, fn id -> id not in existing_replica_ids end)
-
-    Logger.info(
-      "Adjusting replication for dictionary #{dictionary_id}. Missing #{length(missing_replica_ids)} replicas."
-    )
-
-    for replica_id <- missing_replica_ids do
-      case Horde.DynamicSupervisor.start_child(TpIasc.DistributedSupervisor, %{
-             id: {:block_dictionary, dictionary_id, replica_id},
-             start:
-               {Block.Dictionary, :start_link, [{:block_dictionary, dictionary_id, replica_id}]},
-             restart: :transient
-           }) do
-        {:ok, pid} ->
-          Logger.info("Replica created for dictionary #{dictionary_id} with pid #{inspect(pid)}")
-
-        {:error, reason} ->
-          Logger.error(
-            "Error creating replica for dictionary #{dictionary_id}: #{inspect(reason)}"
-          )
-      end
-    end
+    Task.start(fn ->
+      :rpc.call(node, Horde.DynamicSupervisor, :start_child, [
+        TpIasc.DistributedSupervisor,
+        child_spec
+      ])
+    end)
   end
 
   def handle_info(msg, state) do
