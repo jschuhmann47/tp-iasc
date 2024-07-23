@@ -87,7 +87,7 @@ defmodule Clients.ClientHandler do
   end
 
   def check_length(key) do
-    String.length(key) > @max_length
+    String.length(key) > Application.get_env(TpIasc, :key_length, 10)
   end
 
   defp generate_printable_list(list) do
