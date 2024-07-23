@@ -42,7 +42,8 @@ defmodule TpIasc.Helpers do
   def see_database do
     Horde.Registry.select(TpIasc.Registry, [
       {{{:block_dictionary, :"$1", :"$2"}, :_, :_}, [], [{{:block_dictionary, :"$1", :"$2"}}]}
-    ]) |> Enum.map(fn d -> Block.Dictionary.get_map(Block.Dictionary.via_tuple(d)) end)
+    ])
+    |> Enum.map(fn d -> Block.Dictionary.get_map(Block.Dictionary.via_tuple(d)) end)
   end
 
   def get_database_capacity() do
