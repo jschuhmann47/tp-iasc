@@ -43,11 +43,12 @@ defmodule Block.Listener do
     {:reply, keys, node_id}
   end
 
-  def handle_call({:put, key, value}, node_id) do
-    case send_action_checking_quorum(node_id, key, value, :put) do
+  def handle_call({:put, key, value}, _from, node_id) do
+    res = case send_action_checking_quorum(node_id, key, value, :put) do
       true -> :ok
       _ -> :error
     end
+    {:reply, res, node_id}
   end
 
   def handle_cast({:delete, key}, node_id) do
