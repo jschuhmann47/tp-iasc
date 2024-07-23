@@ -76,7 +76,7 @@ defmodule Clients.ClientHandler do
           send_resp(
             conn,
             500,
-            "An error has occurred. Most probably is that some replicas are unavailable"
+            "An error has occurred. Most probably is that some replicas are unavailable or database reached max capacity"
           )
       end
     end
