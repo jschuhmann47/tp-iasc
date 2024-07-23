@@ -28,7 +28,7 @@ defmodule Block.Dictionary do
 
   def update(agent, key, value) do
     len = Agent.get(agent, &Map.keys(&1)) |> length
-    max_length = Application.get_env(:tp_iasc, :max_node_capacity, 3)
+    max_length = Application.get_env(:tp_iasc, :key_length, 3)
 
     if len >= max_length do
       Logger.warning(
