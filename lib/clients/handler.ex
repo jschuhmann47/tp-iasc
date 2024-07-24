@@ -28,7 +28,7 @@ defmodule Clients.ClientHandler do
   end
 
   get "/lesser/:value" do
-    if check_length(value, :value) do
+    if check_length(value, :value_length) do
       send_resp(conn, 401, "Value exceeds max length")
     else
       res = GenServer.call(get_master(), {:get_lesser, value})
@@ -44,7 +44,7 @@ defmodule Clients.ClientHandler do
   end
 
   get "/greater/:value" do
-    if check_length(value, :value) do
+    if check_length(value, :value_length) do
       send_resp(conn, 401, "Key exceeds max length")
     else
       res = GenServer.call(get_master(), {:get_greater, value})
@@ -65,7 +65,7 @@ defmodule Clients.ClientHandler do
   end
 
   put "/:key/:value" do
-    if check_length(key, :key) or check_length(value, :value) do
+    if check_length(key, :key_length) or check_length(value, :value_length) do
       send_resp(conn, 401, "Key or value exceeds max length")
     else
       case GenServer.call(get_master(), {:put, key, value}) do
@@ -90,12 +90,8 @@ defmodule Clients.ClientHandler do
     Orchestrators.Orchestrator.via_tuple(Clients.GetMaster.get_master())
   end
 
-  def check_length(str, :key) do
-    String.length(str) > Application.get_env(:tp_iasc, :key_length, 10)
-  end
-
-  def check_length(str, :value) do
-    String.length(str) > Application.get_env(:tp_iasc, :value_length, 10)
+  def check_length(str, env) do
+    String.length(str) > Application.get_env(:tp_iasc, env, 10)
   end
 
   defp generate_printable_list(list) do
