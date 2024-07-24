@@ -4,18 +4,13 @@ defmodule Clients.ClientHandler do
   plug(:match)
   plug(:dispatch)
 
-  # @orchestrators [Orchestrator1, Orchestrator2, Orchestrator3, Orchestrator4, Orchestrator5]
-
-  # TODO set it in env var
-  @max_length 10
-
   get "/ping" do
     :pong = GenServer.call(get_master(), :ping)
     send_resp(conn, 200, "pong")
   end
 
   get "/:key" do
-    if check_length(key) do
+    if check_length(key, :key) do
       send_resp(conn, 401, "Key exceeds max length")
     else
       res = GenServer.call(get_master(), {:get, key})
@@ -33,7 +28,7 @@ defmodule Clients.ClientHandler do
   end
 
   get "/lesser/:value" do
-    if check_length(value) do
+    if check_length(value, :value_length) do
       send_resp(conn, 401, "Value exceeds max length")
     else
       res = GenServer.call(get_master(), {:get_lesser, value})
@@ -49,7 +44,7 @@ defmodule Clients.ClientHandler do
   end
 
   get "/greater/:value" do
-    if check_length(value) do
+    if check_length(value, :value_length) do
       send_resp(conn, 401, "Key exceeds max length")
     else
       res = GenServer.call(get_master(), {:get_greater, value})
@@ -70,11 +65,20 @@ defmodule Clients.ClientHandler do
   end
 
   put "/:key/:value" do
-    if check_length(key) or check_length(value) do
+    if check_length(key, :key_length) or check_length(value, :value_length) do
       send_resp(conn, 401, "Key or value exceeds max length")
     else
-      GenServer.cast(get_master(), {:put, key, value})
-      send_resp(conn, 202, "Updated key #{key} with value #{value}")
+      case GenServer.call(get_master(), {:put, key, value}) do
+        :ok ->
+          send_resp(conn, 200, "Updated key #{key} with value #{value}")
+
+        _ ->
+          send_resp(
+            conn,
+            500,
+            "An error has occurred (see log for details)"
+          )
+      end
     end
   end
 
@@ -86,8 +90,8 @@ defmodule Clients.ClientHandler do
     Orchestrators.Orchestrator.via_tuple(Clients.GetMaster.get_master())
   end
 
-  def check_length(key) do
-    String.length(key) > @max_length
+  def check_length(str, env) do
+    String.length(str) > Application.get_env(:tp_iasc, env, 10)
   end
 
   defp generate_printable_list(list) do

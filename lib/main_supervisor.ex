@@ -36,7 +36,6 @@ defmodule MainSupervisor do
       restart: :transient
     })
 
-
     start_child(%{
       id: Clients.Supervisor,
       start: {Clients.Supervisor, :start_link, [[]]},

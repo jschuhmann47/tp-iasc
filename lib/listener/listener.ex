@@ -43,37 +43,44 @@ defmodule Block.Listener do
     {:reply, keys, node_id}
   end
 
-  def handle_cast({:put, key, value}, node_id) do
-    send_action_checking_quorum(node_id, key, value, :put)
+  def handle_call({:put, key, value}, _from, node_id) do
+    res =
+      case send_action_checking_quorum(node_id, key, value, :put) do
+        true -> :ok
+        _ -> :error
+      end
+
+    {:reply, res, node_id}
   end
 
   def handle_cast({:delete, key}, node_id) do
     send_action_checking_quorum(node_id, key, nil, :delete)
+    {:noreply, node_id}
   end
 
   def send_action_checking_quorum(node_id, key, value, action) do
     if !have_quorum?() do
       Logger.warning("Don't have quorum to do action #{inspect(action)}")
+      :no_quorum
     else
       send_action_to_all_replicas(node_id, key, value, action)
     end
-
-    {:noreply, node_id}
   end
 
   defp send_action_to_all_replicas(node_id, key, value, action) do
     replication_factor = Application.get_env(:tp_iasc, :replication_factor)
 
-    0..replication_factor-1
-    |> Enum.each(fn replica ->
+    0..(replication_factor - 1)
+    |> Enum.map(fn replica ->
       agent_name = get_name_from_node_and_replica(node_id, replica)
 
       Logger.debug(
         "Action #{inspect(action)}: sending key #{inspect(key)} with value #{inspect(value)} to replica #{inspect(agent_name)}"
       )
 
-      cast_action_to_replica(agent_name, key, value, action)
+      execute_action_in_replica(agent_name, key, value, action)
     end)
+    |> Enum.all?(fn x -> x == :ok end)
   end
 
   def cast_action_to_replica(agent_name, key, value, :put),
@@ -121,6 +128,9 @@ defmodule Block.Listener do
 
   defp execute_action_in_replica(agent_name, value, :greater),
     do: Block.Dictionary.greater(agent_name, value)
+
+  defp execute_action_in_replica(agent_name, key, value, :put),
+    do: Block.Dictionary.update(agent_name, key, value)
 
   defp get_connected_nodes() do
     # We sum one because Node.list excludes the calling node

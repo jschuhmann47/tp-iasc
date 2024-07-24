@@ -12,7 +12,7 @@ defmodule BlockSupervisor do
       [
         {Registry, keys: :unique, name: Block.ListenerRegistry}
       ] ++
-        for i <- 0..dictionary_count - 1 do
+        for i <- 0..(dictionary_count - 1) do
           Supervisor.child_spec(
             %{
               id: {:block_listener, i},
