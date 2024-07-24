@@ -177,6 +177,7 @@ defmodule Orchestrators.Orchestrator do
 
   def handle_info({:nodeup, node}, state) do
     Logger.info("#{__MODULE__} received nodeup event: node #{inspect(node)}")
+
     if are_all_nodes_up?() && am_i_master?(state) do
       Logger.info("All nodes are up")
 
@@ -185,13 +186,15 @@ defmodule Orchestrators.Orchestrator do
 
       Block.DictionarySupervisor.start_dictionaries()
     else
-      Logger.info("#{__MODULE__} Not all nodes are up yet or this node is not the master orchestrator")
+      Logger.info(
+        "#{__MODULE__} Not all nodes are up yet or this node is not the master orchestrator"
+      )
     end
+
     {:noreply, state}
   end
 
   def handle_info({:nodedown, node}, state) do
-
     Logger.info("#{__MODULE__} received nodedown event: node #{inspect(node)}")
     {:noreply, state}
   end
@@ -200,6 +203,4 @@ defmodule Orchestrators.Orchestrator do
     node_count = length(Node.list()) + 1
     node_count == Application.get_env(:tp_iasc, :node_quantity)
   end
-
-
 end
