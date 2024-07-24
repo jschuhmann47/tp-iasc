@@ -6,13 +6,8 @@ defmodule Clients.Supervisor do
     Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
-  defp unique_port do
-    :rand.uniform(1000) + 8000
-  end
-
   def init(_init_arg) do
-    # Idea: if only one client is used across all nodes, use the same port and if it's in use don't do anything
-    port = unique_port()
+    port = Application.get_env(:tp_iasc, :port, 8080)
 
     children = [
       {Plug.Cowboy, scheme: :http, plug: Clients.ClientHandler, options: [port: port]},

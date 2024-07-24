@@ -13,7 +13,8 @@ config :tp_iasc,
   max_node_capacity: 50,
   # M
   node_quantity: 3,
-  log_level: :debug
+  log_level: :debug,
+  port: 8080
 
 config :libcluster,
   topologies: [
