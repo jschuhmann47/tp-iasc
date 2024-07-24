@@ -10,6 +10,7 @@ defmodule TpIasc.Helpers do
     |> Enum.filter(&contains_orchestrator?/1)
   end
 
+  # TpIasc.Helpers.get_master()
   def get_master do
     Enum.find(list_orchestrators(), fn orchestrator ->
       GenServer.call(Orchestrators.Orchestrator.via_tuple(orchestrator), :is_master)

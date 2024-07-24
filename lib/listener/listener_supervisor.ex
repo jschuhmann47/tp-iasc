@@ -6,13 +6,13 @@ defmodule BlockSupervisor do
   end
 
   def init(_init_arg) do
-    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count, 10)
+    dictionary_count = Application.get_env(:tp_iasc, :dictionary_count)
 
     children =
       [
         {Registry, keys: :unique, name: Block.ListenerRegistry}
       ] ++
-        for i <- 0..dictionary_count do
+        for i <- 0..dictionary_count - 1 do
           Supervisor.child_spec(
             %{
               id: {:block_listener, i},

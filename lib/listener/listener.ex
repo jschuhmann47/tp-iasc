@@ -68,9 +68,9 @@ defmodule Block.Listener do
   end
 
   defp send_action_to_all_replicas(node_id, key, value, action) do
-    max = Application.get_env(:tp_iasc, :replication_factor, 3)
+    replication_factor = Application.get_env(:tp_iasc, :replication_factor)
 
-    1..max
+    0..replication_factor-1
     |> Enum.map(fn replica ->
       agent_name = get_name_from_node_and_replica(node_id, replica)
 
