@@ -36,7 +36,6 @@ defmodule MainSupervisor do
       restart: :transient
     })
 
-    Block.DictionarySupervisor.start_dictionaries()
 
     start_child(%{
       id: Clients.Supervisor,

@@ -176,18 +176,31 @@ defmodule Orchestrators.Orchestrator do
     end
   end
 
-  def handle_info({:nodeup, _node}, state) do
-    node_update("joined", state)
-  end
+  def handle_info({:nodeup, node}, state) do
+    Logger.info("#{__MODULE__} received nodeup event: node #{inspect(node)}")
+    if are_all_nodes_up?() && am_i_master?(state) do
+      Logger.info("All nodes are up")
 
-  def handle_info({:nodedown, _node}, state) do
-    node_update("left", state)
-  end
+      # sleep for a bit to allow all nodes to be fully up
+      :timer.sleep(2000)
 
-  defp node_update(calltype, state) do
-    Logger.info("Node #{calltype} the cluster")
-    :timer.sleep(2000)
-    Block.DictionarySupervisor.adjust_all_replications()
+      Block.DictionarySupervisor.start_dictionaries()
+    else
+      Logger.info("#{__MODULE__} Not all nodes are up yet or this node is not the master orchestrator")
+    end
     {:noreply, state}
   end
+
+  def handle_info({:nodedown, node}, state) do
+
+    Logger.info("#{__MODULE__} received nodedown event: node #{inspect(node)}")
+    {:noreply, state}
+  end
+
+  def are_all_nodes_up?() do
+    node_count = length(Node.list()) + 1
+    node_count == Application.get_env(:tp_iasc, :node_quantity)
+  end
+
+
 end
