@@ -1,24 +1,24 @@
 # TpIasc
 
+El objetivo es diseñar e implementar una base de datos clave/valor simple, no persistente, distribuida, que tenga un grado razonable de tolerancia ante ciertos fallos. 
+
 [Link al enunciado](https://docs.google.com/document/d/e/2PACX-1vSuUzfNwg4y3ALbddo0cPrjyabWRvfd3I43fYas2eQFPiqtiWsWOLDHpsxdUKcHUVpH73erhkAmoyV8/pub)
 
+## Resumen de la Arquitectura de la Base de Datos Distribuida en Elixir
 
+### Entidades Principales
 
-### Resumen de la Arquitectura de la Base de Datos Distribuida en Elixir:
-
-#### Entidades Principales
-
-##### Orchestrators.Orchestrator
+#### Orchestrators.Orchestrator
 * Es un GenServer que actúa como punto de entrada para las acciones de lectura y escritura en la base de datos.
 * Cada nodo físico en la red tiene una instancia única de Orchestrators.Orchestrator.
 
-##### Block.Listener
+#### Block.Listener
 * Son múltiples GenServers que se conocen por todos los Orchestrators.Orchestrator.
 * Cuando se realiza una acción de lectura o escritura, el Orchestrators.Orchestrator decide a cuál Block.Listener enviar la petición utilizando una lógica de hash basada en la clave (key).
 * La cantidad de Block.Listener está definida por una configuración denominada dictionary_count.
 * Cada nodo físico tiene sus propias instancias de Block.Listener, ya que son GenServers sin estado y no necesitan ser distribuidos usando Horde.
 
-##### Block.Dictionary
+#### Block.Dictionary
 * Es un Agent que contiene un diccionario para almacenar los valores.
 * Se crean tantos Block.Dictionary como el resultado de dictionary_count * replication_factor.
 * Cada Block.Listener tiene una relación de paridad definida con Block.Dictionary, basada en un factor de replicación configurable (replication_factor).
@@ -40,7 +40,7 @@ Esto implica:
 * Cada nodo tendrá 40 Block.Listener locales.
 * Habrá un total de 80 Block.Dictionary distribuidos entre los 3 nodos, asegurando que las réplicas no residan en el mismo nodo.
 
-Resumen del Proceso
+**Resumen del Proceso**
 
 Lectura/Escritura
     Una solicitud de lectura/escritura llega a Orchestrators.Orchestrator.
@@ -52,17 +52,15 @@ Distribución y Replicación
 
 Esta arquitectura permite una distribución eficiente de datos y proporciona redundancia para asegurar la disponibilidad y tolerancia a fallos en la red de nodos.
 
+## Ejecución
 
-
-## Ejecutar en Windows
+### Ejecutar en Windows
 
 Para iniciar la aplicación:
 
 ```sh
 iex.bat -S mix
 ```
-
-## Ejecutar en Windows (con tests)
 
 Para iniciar la aplicación y ejecutar los tests:
 
@@ -93,7 +91,16 @@ Correr tests:
 iex -S mix test
 ```
 
-## Ejemplo `put` y `get`
+# Cliente
+
+Se tienen los endpoints de HTTP:
+- GET url/:key
+- PUT url/:key/:value
+- GET url/lesser/:value
+- GET url/greater/:value
+- DELETE url/:key
+
+## Ejemplo desde Elixir
 
 Para probar almacenar un valor y luego recuperarlo, podes usar los siguientes comandos en `iex`:
 
